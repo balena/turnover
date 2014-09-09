@@ -13,7 +13,7 @@
 
 #include "message/detail/int_types.hpp"
 #include "message/detail/byte_order.hpp"
-#include "message/attribute_type.hpp"
+#include "message/attribute/type.hpp"
 
 #include "crypto/sha1.hpp"
 #include "crypto/hmac.hpp"
@@ -43,10 +43,10 @@ bool msgint::decoder::check(const char_type* first,
   const uint8_t *p_end = p + hdr_decoder_.length() - sizeof(impl_type);
   uint16_t message_length;
   hmac_sha1::digest_type digest;
-  const uint32::impl_type* fingerprint =
+  const uint32::impl_type* fprint =
     (const uint32::impl_type*)(p_end - sizeof(uint32::impl_type));
-  if ((const uint8_t *)fingerprint == ((const uint8_t *)&p_[1]) &&
-      network_to_host_short(fingerprint->type) == attribute::fingerprint) {
+  if ((const uint8_t *)fprint == ((const uint8_t *)&p_[1]) &&
+      network_to_host_short(fprint->type) == attribute::type::fingerprint) {
     message_length = host_to_network_short(
       hdr_decoder_.length() - sizeof(uint32::impl_type));
     p_end -= sizeof(uint32::impl_type);
