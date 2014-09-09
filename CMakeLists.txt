@@ -33,6 +33,7 @@ config_compiler_and_linker()
 
 # Unit Tests
 add_executable(turnover_tests
+  crypto/crc32_unittest.cpp
   crypto/sha1_unittest.cpp
   crypto/md5_unittest.cpp
   crypto/hmac_unittest.cpp
