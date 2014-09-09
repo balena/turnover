@@ -31,6 +31,11 @@ if(UNIX)
   add_compile_flags(BEFORE "-std=c++0x -Wno-deprecated")
 endif()
 
+if(MSVC)
+  # defaults to Windows Vista (XP is deprecated)
+  add_compile_flags(AFTER "/D_WIN32_WINNT=0x600") 
+endif()
+
 add_subdirectory(boost)
 
 include_directories(boost gtest/include . src)

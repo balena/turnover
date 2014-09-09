@@ -64,8 +64,10 @@ foreach(_file ${_sources})
         COMPILE_FLAGS ${_avx2_compile_flags})
     endif()
   elseif(${_file} MATCHES ".*ssse3\\.cpp")
-    set_source_files_properties(${_file} PROPERTIES
-      COMPILE_FLAGS ${_ssse3_compile_flags})
+    if(_ssse3_compile_flags)
+      set_source_files_properties(${_file} PROPERTIES
+        COMPILE_FLAGS ${_ssse3_compile_flags})
+    endif()
   elseif(${_file} MATCHES ".*event_log_backend\\.cpp")
     set_source_files_properties(${_file} PROPERTIES
       HEADER_FILE_ONLY TRUE)
