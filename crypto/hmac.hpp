@@ -4,35 +4,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CRYPTO_SHA1_HPP
-#define CRYPTO_SHA1_HPP
+#ifndef CRYPTO_HMAC_HPP
+#define CRYPTO_HMAC_HPP
 
 #include <cstdint>
 #include <cstdlib>
 
 namespace crypto {
 
-class sha1 {
+template<typename Digest>
+class hmac {
  public:
-  typedef uint8_t digest_type[20];
-  static const size_t block_size = 64;
+  typedef typename Digest::digest_type digest_type;
+  static const size_t block_size = Digest::block_size;
 
-  sha1();
-  ~sha1();
+  hmac(const void *key, size_t key_len);
+  ~hmac();
 
   void update(const void *data, size_t data_len);
   void final(digest_type &digest);
 
  private:
-  uint32_t state_[5];
-  uint32_t count_[2];
-  uint8_t buffer_[64];
-
-  void transform(const uint32_t data[16]);
+  Digest ctx_;
+  uint8_t k_ipad_[block_size];
+  uint8_t k_opad_[block_size];
 };
 
 } // namespace crypto
 
-#include "crypto/sha1.ipp"
+#include "crypto/hmac.ipp"
 
-#endif // CRYPTO_SHA1_HPP
+#endif // CRYPTO_HMAC_HPP

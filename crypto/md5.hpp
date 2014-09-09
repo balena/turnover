@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TURNOVER_MD5_HPP
-#define TURNOVER_MD5_HPP
+#ifndef CRYPTO_MD5_HPP
+#define CRYPTO_MD5_HPP
 
 #include <cstdint>
 #include <cstdlib>
@@ -15,6 +15,7 @@ namespace crypto {
 class md5 {
  public:
   typedef uint8_t digest_type[16];
+  static const size_t block_size = 64;
 
   md5();
   ~md5();
@@ -27,8 +28,8 @@ class md5 {
 
   MD5_u32plus lo_, hi_;
   MD5_u32plus a_, b_, c_, d_;
-  uint8_t buffer_[64];
   MD5_u32plus block_[16];
+  uint8_t buffer_[64];
 
   const void *body(const void *data, size_t size);
 };
@@ -37,4 +38,4 @@ class md5 {
 
 #include "crypto/md5.ipp"
 
-#endif // TURNOVER_MD5_HPP
+#endif // CRYPTO_MD5_HPP

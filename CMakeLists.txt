@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+project(turnover)
+
 add_subdirectory(boost)
 add_subdirectory(gtest)
 
@@ -33,6 +35,7 @@ config_compiler_and_linker()
 add_executable(turnover_tests
   crypto/sha1_unittest.cpp
   crypto/md5_unittest.cpp
+  crypto/hmac_unittest.cpp
 )
 add_dependencies(turnover_tests gtest gtest_main)
 target_link_libraries(turnover_tests gtest gtest_main)
