@@ -4,16 +4,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAILS_IMPL_XOR_IP_ADDRESS_HPP
-#define MESSAGE_DETAILS_IMPL_XOR_IP_ADDRESS_HPP
+#ifndef MESSAGE_DETAIL_ATTRIBUTE_IMPL_XOR_IP_ADDRESS_HPP
+#define MESSAGE_DETAIL_ATTRIBUTE_IMPL_XOR_IP_ADDRESS_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "message/detail/byte_order.hpp"
+#include <message/detail/config.hpp>
+
+#include <message/detail/byte_order.hpp>
+
+#include <message/detail/push_options.hpp>
 
 namespace stun {
+namespace attribute {
 namespace detail {
 
 xor_ip_address::decoder::decoder(const uint8_t* msg_hdr,
@@ -54,6 +59,7 @@ xor_ip_address::address_type xor_ip_address::decoder::address() const {
 }
 
 uint16_t xor_ip_address::decoder::port() const {
+  using namespace ::stun::detail::byte_order;
   return base_.port() ^ (uint16_t)(network_to_host_long(p_->magic) >> 16);
 }
 
@@ -89,11 +95,15 @@ void xor_ip_address::encoder::set_address(const address_type &address) {
 }
 
 void xor_ip_address::encoder::set_port(uint16_t port) {
+  using namespace ::stun::detail::byte_order;
   base_.set_port(port ^ (uint16_t)(network_to_host_long(p_->magic) >> 16));
 }
 
 } // namespace detail
+} // namespace attribute
 } // namespace stun
 
-#endif // MESSAGE_DETAILS_IMPL_XOR_IP_ADDRESS_HPP
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_DETAIL_ATTRIBUTE_IMPL_XOR_IP_ADDRESS_HPP
 

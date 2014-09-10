@@ -11,7 +11,11 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
+#include <message/detail/config.hpp>
+
 #include <cstdint>
+
+#include <message/detail/push_options.hpp>
 
 namespace stun {
 namespace detail {
@@ -34,22 +38,22 @@ struct message_header {
 
   class decoder {
    public:
-    decoder(const uint8_t* msg_hdr);
-    uint16_t type() const;
-    uint16_t length() const;
-    uint32_t magic() const;
-    const tsx_id_type &tsx_id() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr);
+    MESSAGE_DECL uint16_t type() const;
+    MESSAGE_DECL uint16_t length() const;
+    MESSAGE_DECL uint32_t magic() const;
+    MESSAGE_DECL const tsx_id_type &tsx_id() const;
    private:
     const impl_type* p_;
   };
 
   class encoder {
    public:
-    encoder(uint8_t* msg_hdr);
-    void set_type(uint16_t type);
-    void set_length(uint16_t length);
-    void set_magic(uint32_t magic);
-    void set_tsx_id(const tsx_id_type &tsx_id);
+    MESSAGE_DECL encoder(uint8_t* msg_hdr);
+    MESSAGE_DECL void set_type(uint16_t type);
+    MESSAGE_DECL void set_length(uint16_t length);
+    MESSAGE_DECL void set_magic(uint32_t magic);
+    MESSAGE_DECL void set_tsx_id(const tsx_id_type &tsx_id);
    private:
     impl_type* p_;
   };
@@ -58,7 +62,11 @@ struct message_header {
 } // namespace detail
 } // namespace stun
 
-#include "message/detail/impl/message_header.ipp"
+#include <message/detail/pop_options.hpp>
+
+#if defined(MESSAGE_HEADER_ONLY)
+#include <message/detail/impl/message_header.ipp>
+#endif // defined(MESSAGE_HEADER_ONLY)
 
 #endif // MESSAGE_DETAIL_MESSAGE_HEADER_HPP
 

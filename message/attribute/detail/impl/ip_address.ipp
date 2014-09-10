@@ -11,10 +11,15 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "message/detail/byte_order.hpp"
+#include <message/detail/config.hpp>
+
+#include <message/detail/byte_order.hpp>
 #include <cstring>
 
+#include <message/detail/push_options.hpp>
+
 namespace stun {
+namespace attribute {
 namespace detail {
 
 ip_address::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
@@ -23,17 +28,14 @@ ip_address::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
 }
 
 bool ip_address::decoder::valid() const {
+  using namespace ::stun::detail::byte_order;
   switch (p_->family) {
     case 1:
-      return network_to_host_short(p_->length) ==
-        sizeof(attribute_base) + sizeof(p_->unused) +
-        sizeof(p_->family) + sizeof(p_->port) +
-        sizeof(p_->addr.v4);
+      return length() == sizeof(attribute_base) + sizeof(p_->unused) +
+          sizeof(p_->family) + sizeof(p_->port) + sizeof(p_->addr.v4);
     case 2:
-      return network_to_host_short(p_->length) ==
-        sizeof(attribute_base) + sizeof(p_->unused) +
-        sizeof(p_->family) + sizeof(p_->port) +
-        sizeof(p_->addr.v6);
+      return length() == sizeof(attribute_base) + sizeof(p_->unused) +
+          sizeof(p_->family) + sizeof(p_->port) + sizeof(p_->addr.v6);
   }
   return false;
 }
@@ -46,7 +48,7 @@ ip_address::address_type ip_address::decoder::address() const {
     case 1: {
       address_v4::bytes_type bytes;
       memcpy(bytes.data(), p_->addr.v4, sizeof(p_->addr.v4));
-	  return address_type(address_v4(bytes));
+      return address_type(address_v4(bytes));
     }
     case 2: {
       address_v6::bytes_type bytes;
@@ -58,6 +60,7 @@ ip_address::address_type ip_address::decoder::address() const {
 }
 
 uint16_t ip_address::decoder::port() const {
+  using namespace ::stun::detail::byte_order;
   return network_to_host_short(p_->port);
 }
 
@@ -85,11 +88,15 @@ void ip_address::encoder::set_address(const address_type &address) {
 }
 
 void ip_address::encoder::set_port(uint16_t port) {
+  using namespace ::stun::detail::byte_order;
   p_->port = host_to_network_short(port);
 }
 
 } // namespace detail
+} // namespace attribute
 } // namespace stun
+
+#include <message/detail/pop_options.hpp>
 
 #endif // MESSAGE_DETAILS_IMPL_IP_ADDRESS_HPP
 

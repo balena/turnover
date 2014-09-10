@@ -4,18 +4,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAILS_IP_ADDRESS_HPP
-#define MESSAGE_DETAILS_IP_ADDRESS_HPP
+#ifndef MESSAGE_ATTRIBUTE_DETAILS_IP_ADDRESS_HPP
+#define MESSAGE_ATTRIBUTE_DETAILS_IP_ADDRESS_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
+#include <message/detail/config.hpp>
+
 #include <boost/asio/ip/address.hpp>
 
-#include "message/detail/attribute_base.hpp"
+#include <message/attribute/detail/attribute_base.hpp>
+
+#include <message/detail/push_options.hpp>
 
 namespace stun {
+namespace attribute {
 namespace detail {
 
 struct ip_address {
@@ -36,10 +41,10 @@ struct ip_address {
   class decoder : public attribute_base::decoder {
    public:
     typedef ip_address::address_type address_type;
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    address_type address() const;
-    uint16_t port() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL address_type address() const;
+    MESSAGE_DECL uint16_t port() const;
    private:
     const impl_type* p_;
   };
@@ -47,18 +52,23 @@ struct ip_address {
   class encoder : public attribute_base::encoder {
    public:
     typedef ip_address::address_type address_type;
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
-    void set_address(const address_type &address);
-    void set_port(uint16_t port);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL void set_address(const address_type &address);
+    MESSAGE_DECL void set_port(uint16_t port);
    private:
     impl_type* p_;
   };
 };
 
 } // namespace detail
+} // namespace attribute
 } // namespace stun
 
-#include "message/detail/impl/ip_address.ipp"
+#include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_DETAILS_IP_ADDRESS_HPP
+#if defined(MESSAGE_HEADER_ONLY)
+#include <message/attribute/detail/impl/ip_address.ipp>
+#endif // defined(MESSAGE_HEADER_ONLY)
+
+#endif // MESSAGE_ATTRIBUTE_DETAILS_IP_ADDRESS_HPP
 

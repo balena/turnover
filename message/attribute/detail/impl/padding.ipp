@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_ATTRIBUTE_TYPE_HPP
-#define MESSAGE_ATTRIBUTE_TYPE_HPP
+#ifndef MESSAGE_DETAIL_IMPL_PADDING_IPP
+#define MESSAGE_DETAIL_IMPL_PADDING_IPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -13,23 +13,24 @@
 
 #include <message/detail/config.hpp>
 
-#include <cstdint>
-
 #include <message/detail/push_options.hpp>
 
 namespace stun {
 namespace attribute {
+namespace detail {
 
-struct type {
-#define MESSAGE_ATTRIBUTE_DEF(d, a) static const uint16_t d = a;
-#include <message/attribute/attributes_template.hpp>
-#undef MESSAGE_ATTRIBUTE_DEF
-};
+void append_padding(uint8_t *p, size_t n, uint8_t pad) {
+  using namespace std; // For memset.
+  if ((n & 0x03) > 0) {
+    memset(p, pad, 4 - (n & 0x03));
+  }
+}
 
+} // namespace detail
 } // namespace attribute
 } // namespace stun
 
 #include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_ATTRIBUTE_TYPE_HPP
+#endif // MESSAGE_DETAIL_IMPL_PADDING_HPP
 

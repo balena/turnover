@@ -4,17 +4,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_IMPL_INT_TYPES_HPP
-#define MESSAGE_DETAIL_IMPL_INT_TYPES_HPP
+#ifndef MESSAGE_ATTRIBUTE_DETAIL_IMPL_INT_TYPES_HPP
+#define MESSAGE_ATTRIBUTE_DETAIL_IMPL_INT_TYPES_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "message/detail/byte_order.hpp"
+#include <message/detail/config.hpp>
+
+#include <message/detail/byte_order.hpp>
 #include <cstring>
 
+#include <message/detail/push_options.hpp>
+
 namespace stun {
+namespace attribute {
 namespace detail {
 
 uint8::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
@@ -80,6 +85,7 @@ bool uint16::decoder::valid() const {
 }
 
 uint16_t uint16::decoder::value() const {
+  using namespace ::stun::detail::byte_order;
   return network_to_host_short(p_->value);
 }
 
@@ -92,6 +98,7 @@ uint16::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
 }
 
 void uint16::encoder::set_value(uint16_t value) {
+  using namespace ::stun::detail::byte_order;
   p_->value = host_to_network_short(value);
 }
 
@@ -106,6 +113,7 @@ bool uint16_pad::decoder::valid() const {
 }
 
 uint16_t uint16_pad::decoder::value() const {
+  using namespace ::stun::detail::byte_order;
   return network_to_host_short(p_->value);
 }
 
@@ -119,6 +127,7 @@ uint16_pad::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr,
 }
 
 void uint16_pad::encoder::set_value(uint16_t value) {
+  using namespace ::stun::detail::byte_order;
   p_->value = host_to_network_short(value);
 }
 
@@ -133,6 +142,7 @@ bool uint32::decoder::valid() const {
 }
 
 uint32_t uint32::decoder::value() const {
+  using namespace ::stun::detail::byte_order;
   return network_to_host_long(p_->value);
 }
 
@@ -144,6 +154,7 @@ uint32::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
 }
 
 void uint32::encoder::set_value(uint32_t value) {
+  using namespace ::stun::detail::byte_order;
   p_->value = host_to_network_long(value);
 }
 
@@ -158,6 +169,7 @@ bool uint64::decoder::valid() const {
 }
 
 uint64_t uint64::decoder::value() const {
+  using namespace ::stun::detail::byte_order;
   return network_to_host_long_long(p_->value);
 }
 
@@ -169,11 +181,15 @@ uint64::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
 }
 
 void uint64::encoder::set_value(uint64_t value) {
+  using namespace ::stun::detail::byte_order;
   p_->value = host_to_network_long_long(value);
 }
 
 } // namespace detail
+} // namespace attribute
 } // namespace stun
 
-#endif // MESSAGE_DETAIL_IMPL_INT_TYPES_HPP
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_ATTRIBUTE_DETAIL_IMPL_INT_TYPES_HPP
 

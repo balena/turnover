@@ -4,16 +4,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_INT_TYPES_HPP
-#define MESSAGE_DETAIL_INT_TYPES_HPP
+#ifndef MESSAGE_ATTRIBUTE_DETAIL_INT_TYPES_HPP
+#define MESSAGE_ATTRIBUTE_DETAIL_INT_TYPES_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "message/detail/attribute_base.hpp"
+#include <message/detail/config.hpp>
+
+#include <message/attribute/detail/attribute_base.hpp>
+
+#include <message/detail/push_options.hpp>
 
 namespace stun {
+namespace attribute {
 namespace detail {
 
 struct uint8 {
@@ -26,17 +31,17 @@ struct uint8 {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint8_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint8_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
-    void set_value(uint8_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL void set_value(uint8_t value);
    private:
     impl_type* p_;
   };
@@ -47,17 +52,17 @@ struct uint8_pad {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint8_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint8_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr, uint8_t pad = 0);
-    void set_value(uint8_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr, uint8_t pad = 0);
+    MESSAGE_DECL void set_value(uint8_t value);
    private:
     impl_type* p_;
   };
@@ -73,17 +78,17 @@ struct uint16 {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint16_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint16_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
-    void set_value(uint16_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL void set_value(uint16_t value);
    private:
     impl_type* p_;
   };
@@ -94,17 +99,17 @@ struct uint16_pad {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint16_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint16_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr, uint8_t pad = 0);
-    void set_value(uint16_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr, uint8_t pad = 0);
+    MESSAGE_DECL void set_value(uint16_t value);
    private:
     impl_type* p_;
   };
@@ -119,17 +124,17 @@ struct uint32 {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint32_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint32_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
-    void set_value(uint32_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL void set_value(uint32_t value);
    private:
     impl_type* p_;
   };
@@ -144,26 +149,31 @@ struct uint64 {
 
   class decoder : public attribute_base::decoder {
    public:
-    decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    bool valid() const;
-    uint64_t value() const;
+    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL uint64_t value() const;
    private:
     const impl_type* p_;
   };
 
   class encoder : public attribute_base::encoder {
    public:
-    encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
-    void set_value(uint64_t value);
+    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL void set_value(uint64_t value);
    private:
     impl_type* p_;
   };
 };
 
 } // namespace detail
+} // namespace attribute
 } // namespace stun
 
-#include "message/detail/impl/int_types.ipp"
+#include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_DETAIL_INT_TYPES_HPP
+#if defined(MESSAGE_HEADER_ONLY)
+#include <message/attribute/detail/impl/int_types.ipp>
+#endif // defined(MESSAGE_HEADER_ONLY)
+
+#endif // MESSAGE_ATTRIBUTE_DETAIL_INT_TYPES_HPP
 

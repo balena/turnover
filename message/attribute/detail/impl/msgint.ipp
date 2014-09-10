@@ -11,16 +11,21 @@
 # pragma once
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
-#include "message/detail/int_types.hpp"
-#include "message/detail/byte_order.hpp"
-#include "message/attribute/type.hpp"
+#include <message/detail/config.hpp>
 
-#include "crypto/sha1.hpp"
-#include "crypto/hmac.hpp"
+#include <message/attribute/type.hpp>
+#include <message/attribute/detail/int_types.hpp>
+#include <message/detail/byte_order.hpp>
+
+#include <crypto/sha1.hpp>
+#include <crypto/hmac.hpp>
 
 #include <cstring>
 
+#include <message/detail/push_options.hpp>
+
 namespace stun {
+namespace attribute {
 namespace detail {
 
 msgint::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
@@ -34,10 +39,9 @@ bool msgint::decoder::valid() const {
   return length() == sizeof(p_->hmac);
 }
 
-template<typename char_type>
-bool msgint::decoder::check(const char_type* first,
-    const char_type* last) const {
+bool msgint::decoder::check(const uint8_t* key, size_t key_len) const {
   using namespace std; // For memcmp.
+  using namespace ::stun::detail::byte_order;
   typedef crypto::hmac<crypto::sha1> hmac_sha1;
   const uint8_t *p = (const uint8_t*)hdr_;
   const uint8_t *p_end = p + hdr_decoder_.length() - sizeof(impl_type);
@@ -53,17 +57,13 @@ bool msgint::decoder::check(const char_type* first,
   } else {
     message_length = hdr_->length;
   }
-  hmac_sha1 ctx(first, (last - first) * sizeof(char_type));
+  hmac_sha1 ctx(key, key_len);
   ctx.update(hdr_, sizeof(hdr_->type));
   ctx.update(&message_length, sizeof(hdr_->length));
   p += sizeof(hdr_->type) + sizeof(hdr_->length);
   ctx.update(p, p_end - p);
   ctx.final(digest);
   return memcmp(digest, p_->hmac, sizeof(digest)) == 0 ? true : false;
-}
-
-bool msgint::decoder::check(const std::string &key) const {
-  return check(key.data(), key.data() + key.length());
 }
 
 msgint::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
@@ -73,22 +73,20 @@ msgint::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
     p_((impl_type*)attr_hdr) {
 }
 
-template<typename char_type>
-void msgint::encoder::sign(const char_type* first, const char_type* last) {
+void msgint::encoder::sign(const uint8_t* key, size_t key_len) {
   typedef crypto::hmac<crypto::sha1> hmac_sha1;
   uint8_t *p = (uint8_t *)hdr_;
   uint8_t *p_end = p + hdr_decoder_.length() - sizeof(impl_type);
-  hmac_sha1 ctx(first, (last - first) * sizeof(char_type));
+  hmac_sha1 ctx(key, key_len);
   ctx.update(p, p_end - p);
   ctx.final(p_->hmac);
 }
 
-void msgint::encoder::sign(const std::string& key) {
-  sign(key.data(), key.data() + key.length());
-}
-
 } // namespace detail
+} // namespace attribute
 } // namespace stun
+
+#include <message/detail/pop_options.hpp>
 
 #endif // MESSAGE_DETAIL_IMPL_MSGINT_HPP
 
