@@ -28,7 +28,7 @@ uint8::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
 }
 
 bool uint8::decoder::valid() const {
-  return length() == sizeof(impl_type) - sizeof(attribute_base::impl_type);
+  return length() == sizeof(impl_type) - attribute_base::size;
 }
 
 uint8_t uint8::decoder::value() const {
@@ -39,7 +39,7 @@ uint8::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
   : attribute_base::encoder(msg_hdr, attr_hdr),
     p_((impl_type*)attr_hdr) {
   using namespace std;
-  set_length(sizeof(impl_type) - sizeof(attribute_base::impl_type));
+  set_length(sizeof(impl_type) - attribute_base::size);
   memset(&p_->unused, 0, sizeof(p_->unused));
 }
 
@@ -81,7 +81,7 @@ uint16::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
 }
 
 bool uint16::decoder::valid() const {
-  return length() == sizeof(impl_type) - sizeof(attribute_base::impl_type);
+  return length() == sizeof(impl_type) - attribute_base::size;
 }
 
 uint16_t uint16::decoder::value() const {
@@ -93,7 +93,7 @@ uint16::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
   : attribute_base::encoder(msg_hdr, attr_hdr),
     p_((impl_type*)attr_hdr) {
   using namespace std;
-  set_length(sizeof(impl_type) - sizeof(attribute_base::impl_type));
+  set_length(sizeof(impl_type) - attribute_base::size);
   memset(&p_->unused, 0, sizeof(p_->unused));
 }
 
@@ -138,7 +138,7 @@ uint32::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
 }
 
 bool uint32::decoder::valid() const {
-  return length() == sizeof(impl_type) - sizeof(attribute_base::impl_type);
+  return length() == sizeof(impl_type) - attribute_base::size;
 }
 
 uint32_t uint32::decoder::value() const {
@@ -150,7 +150,7 @@ uint32::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
   : attribute_base::encoder(msg_hdr, attr_hdr),
     p_((impl_type*)attr_hdr) {
   using namespace std;
-  set_length(sizeof(impl_type) - sizeof(attribute_base::impl_type));
+  set_length(sizeof(impl_type) - attribute_base::size);
 }
 
 void uint32::encoder::set_value(uint32_t value) {
@@ -165,7 +165,7 @@ uint64::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
 }
 
 bool uint64::decoder::valid() const {
-  return length() == sizeof(impl_type) - sizeof(attribute_base::impl_type);
+  return length() == sizeof(impl_type) - attribute_base::size;
 }
 
 uint64_t uint64::decoder::value() const {
@@ -177,7 +177,7 @@ uint64::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
   : attribute_base::encoder(msg_hdr, attr_hdr),
     p_((impl_type*)attr_hdr) {
   using namespace std;
-  set_length(sizeof(impl_type) - sizeof(attribute_base::impl_type));
+  set_length(sizeof(impl_type) - attribute_base::size);
 }
 
 void uint64::encoder::set_value(uint64_t value) {

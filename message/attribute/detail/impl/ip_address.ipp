@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAILS_IMPL_IP_ADDRESS_HPP
-#define MESSAGE_DETAILS_IMPL_IP_ADDRESS_HPP
+#ifndef MESSAGE_ATTRIBUTE_DETAIL_IMPL_IP_ADDRESS_HPP
+#define MESSAGE_ATTRIBUTE_DETAIL_IMPL_IP_ADDRESS_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -31,11 +31,11 @@ bool ip_address::decoder::valid() const {
   using namespace ::stun::detail::byte_order;
   switch (p_->family) {
     case 1:
-      return length() == sizeof(attribute_base) + sizeof(p_->unused) +
-          sizeof(p_->family) + sizeof(p_->port) + sizeof(p_->addr.v4);
+      return length() == sizeof(p_->unused) + sizeof(p_->family) +
+          sizeof(p_->port) + sizeof(p_->addr.v4);
     case 2:
-      return length() == sizeof(attribute_base) + sizeof(p_->unused) +
-          sizeof(p_->family) + sizeof(p_->port) + sizeof(p_->addr.v6);
+      return length() == sizeof(p_->unused) + sizeof(p_->family) +
+          sizeof(p_->port) + sizeof(p_->addr.v6);
   }
   return false;
 }
@@ -98,5 +98,5 @@ void ip_address::encoder::set_port(uint16_t port) {
 
 #include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_DETAILS_IMPL_IP_ADDRESS_HPP
+#endif // MESSAGE_ATTRIBUTE_DETAILS_IMPL_IP_ADDRESS_HPP
 

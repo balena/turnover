@@ -28,6 +28,7 @@ struct uint8 {
     uint8_t unused[3];
   };
 #pragma pack(pop)
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
@@ -49,6 +50,7 @@ struct uint8 {
 
 struct uint8_pad {
   typedef uint8::impl_type impl_type;
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
@@ -75,6 +77,7 @@ struct uint16 {
     uint8_t unused[2];
   };
 #pragma pack(pop)
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
@@ -96,6 +99,7 @@ struct uint16 {
 
 struct uint16_pad {
   typedef uint16::impl_type impl_type;
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
@@ -121,6 +125,7 @@ struct uint32 {
     uint32_t value;      // single 32-bit value
   };
 #pragma pack(pop)
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
@@ -146,6 +151,7 @@ struct uint64 {
     uint64_t value;      // single 32-bit value
   };
 #pragma pack(pop)
+  static const size_t size = sizeof(impl_type);
 
   class decoder : public attribute_base::decoder {
    public:
