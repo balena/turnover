@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAILS_IMPL_MESSAGE_HEADER_IPP
-#define MESSAGE_DETAILS_IMPL_MESSAGE_HEADER_IPP
+#ifndef MESSAGE_DETAIL_IMPL_MESSAGE_HEADER_IPP
+#define MESSAGE_DETAIL_IMPL_MESSAGE_HEADER_IPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -65,5 +65,5 @@ void message_header::encoder::set_tsx_id(const tsx_id_type &tsx_id) {
 
 #include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_DETAILS_IMPL_MESSAGE_HEADER_IPP
+#endif // MESSAGE_DETAIL_IMPL_MESSAGE_HEADER_IPP
 

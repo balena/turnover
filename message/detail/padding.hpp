@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_BYTE_ORDER_HPP
-#define MESSAGE_DETAIL_BYTE_ORDER_HPP
+#ifndef MESSAGE_DETAIL_PADDING_HPP
+#define MESSAGE_DETAIL_PADDING_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -13,34 +13,24 @@
 
 #include <message/detail/config.hpp>
 
+#include <cstring> // for size_t
 #include <cstdint>
 
 #include <message/detail/push_options.hpp>
 
 namespace stun {
 namespace detail {
-namespace byte_order {
 
-MESSAGE_DECL uint32_t network_to_host_long(uint32_t value);
+MESSAGE_DECL void append_padding(uint8_t *p, size_t n, uint8_t pad);
 
-MESSAGE_DECL uint32_t host_to_network_long(uint32_t value);
-
-MESSAGE_DECL uint16_t network_to_host_short(uint16_t value);
-
-MESSAGE_DECL uint16_t host_to_network_short(uint16_t value);
-
-MESSAGE_DECL uint64_t network_to_host_long_long(uint64_t value);
-
-MESSAGE_DECL uint64_t host_to_network_long_long(uint64_t value);
-
-} // namespace byte_order
 } // namespace detail
 } // namespace stun
 
 #include <message/detail/pop_options.hpp>
 
 #if defined(MESSAGE_HEADER_ONLY)
-#include <message/detail/impl/byte_order.ipp>
+#include <message/detail/impl/padding.ipp>
 #endif // defined(MESSAGE_HEADER_ONLY)
 
-#endif // MESSAGE_DETAIL_BYTE_ORDER_HPP
+#endif // MESSAGE_DETAIL_PADDING_HPP
+
