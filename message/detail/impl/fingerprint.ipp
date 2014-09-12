@@ -13,7 +13,7 @@
 
 #include <message/detail/config.hpp>
 
-#include <crypto/crc32.hpp>
+#include <message/detail/crypto/crc32.hpp>
 #include <message/detail/attribute_header.hpp>
 #include <message/detail/byte_order.hpp>
 
@@ -50,8 +50,8 @@ uint32_t fingerprint::digest(const header_type *header) {
   crc32 ctx;
   ctx.update(header, n);
   ctx.final(digest);
-  digest ^= xor_fingerprint;
-  return digest;
+  *(uint32_t*)digest ^= xor_fingerprint;
+  return network_to_host_long(*(uint32_t*)digest);
 }
 
 } // namespace detail

@@ -12,6 +12,8 @@
 #include <iomanip>
 #include <cstring>
 #include <message/detail/crypto/crc32.hpp>
+#include <message/detail/message_integrity.hpp>
+#include <message/detail/fingerprint.hpp>
 #include <gtest/gtest.h>
 
 using namespace stun::detail::crypto;

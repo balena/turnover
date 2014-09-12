@@ -16,9 +16,10 @@
 #include <message/attribute/type.hpp>
 #include <message/detail/int_types.hpp>
 #include <message/detail/byte_order.hpp>
+#include <message/detail/attribute_header.hpp>
 
-#include <crypto/sha1.hpp>
-#include <crypto/hmac.hpp>
+#include <message/detail/crypto/sha1.hpp>
+#include <message/detail/crypto/hmac.hpp>
 
 #include <cstring>
 
