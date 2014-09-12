@@ -4,6 +4,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef MESSAGE_DETAIL_CRYPTO_IMPL_CRC32_IPP
+#define MESSAGE_DETAIL_CRYPTO_IMPL_CRC32_IPP
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
+#include <message/detail/config.hpp>
+
+#include <message/detail/push_options.hpp>
+
+namespace stun {
+namespace detail {
+namespace crypto {
+
 /*-
  *  COPYRIGHT (C) 1986 Gary S. Brown.  You may use this program, or
  *  code or tables extracted from it, as desired without restriction.
@@ -46,16 +61,11 @@
  * CRC32 code derived from work by Gary S. Brown.
  */
 
-namespace crypto {
-
-inline crc32::crc32()
+crc32::crc32()
   : crc_(~0UL) {
 }
 
-inline crc32::~crc32() {
-}
-
-inline void crc32::update(const void *data, size_t data_len) {
+void crc32::update(const void *data, size_t data_len) {
 #ifdef WORDS_BIGENDIAN
   static uint32_t crc32_tab[] = {
     0x00000000L, 0x96300777L, 0x2c610eeeL, 0xba510999L, 0x19c46d07L,
@@ -172,9 +182,16 @@ inline void crc32::update(const void *data, size_t data_len) {
     crc_ = crc32_tab[(crc_ ^ *p++) & 0xFF] ^ (crc_ >> 8);
 }
 
-inline void crc32::final(digest_type &digest) {
+void crc32::final(digest_type &digest) {
   uint32_t crc = crc_ ^ ~0UL;
-  memcpy(digest, &crc, sizeof(crc));
+  memcpy(&digest, &crc, sizeof(crc));
 }
 
 } // namespace crypto
+} // namespace detail
+} // namespace stun
+
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_DETAIL_CRYPTO_IMPL_CRC32_IPP
+

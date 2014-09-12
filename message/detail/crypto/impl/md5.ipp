@@ -4,6 +4,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef MESSAGE_DETAIL_CRYPTO_IMPL_MD5_IPP
+#define MESSAGE_DETAIL_CRYPTO_IMPL_MD5_IPP
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
+#include <message/detail/config.hpp>
+
+#include <cstring>
+
+#include <message/detail/push_options.hpp>
+
+namespace stun {
+namespace detail {
+namespace crypto {
+
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
  * MD5 Message-Digest Algorithm (RFC 1321).
@@ -40,10 +57,6 @@
  * optimizations are not included to reduce source code size and avoid
  * compile-time configuration.
  */
-
-#include <cstring>
-
-namespace crypto {
 
 /*
  * The basic MD5 functions.
@@ -94,8 +107,7 @@ namespace crypto {
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters.  There are no alignment requirements.
  */
-inline const void *md5::body(const void *data, size_t size)
-{
+const void *md5::body(const void *data, size_t size) {
   const uint8_t *ptr;
   MD5_u32plus a, b, c, d;
   MD5_u32plus saved_a, saved_b, saved_c, saved_d;
@@ -210,7 +222,7 @@ inline const void *md5::body(const void *data, size_t size)
 #undef SET
 #undef GET
 
-inline md5::md5() {
+md5::md5() {
   a_ = 0x67452301;
   b_ = 0xefcdab89;
   c_ = 0x98badcfe;
@@ -220,10 +232,8 @@ inline md5::md5() {
   hi_ = 0;
 }
 
-inline md5::~md5() {
-}
-
-inline void md5::update(const void *data, size_t size) {
+void md5::update(const void *data, size_t size) {
+  using namespace std; // For memcpy.
   MD5_u32plus saved_lo;
   size_t used, available;
 
@@ -256,7 +266,8 @@ inline void md5::update(const void *data, size_t size) {
   memcpy(buffer_, data, size);
 }
 
-inline void md5::final(digest_type &digest) {
+void md5::final(digest_type &digest) {
+  using namespace std; // For memset.
   size_t used, available;
 
   used = lo_ & 0x3f;
@@ -305,3 +316,10 @@ inline void md5::final(digest_type &digest) {
 }
 
 } // namespace crypto
+} // namespace detail
+} // namespace stun
+
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_DETAIL_CRYPTO_IMPL_MD5_IPP
+

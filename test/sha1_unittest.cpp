@@ -11,9 +11,10 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <crypto/sha1.hpp>
-#include <crypto/hmac.hpp>
+#include <message/detail/crypto/sha1.hpp>
 #include <gtest/gtest.h>
+
+using namespace stun::detail::crypto;
 
 namespace {
 
@@ -50,39 +51,32 @@ std::string digest_to_hex(const uint8_t digest[20]) {
 
 } // empty namespace
 
-TEST(HmacSha1Hash, TestVectors) {
-  struct {
-    const char *test_data;
-    const char *key;
-    size_t key_len;
-    const char *data;
-    size_t data_len;
-    const char *digest;
-  } test[] = {
-    { "Hi There",
-      "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b", 16,
-      "Hi There", 8,
-      "675B0B3A 1B4DDF4E 124872DA 6C2F632B FED957E9" },
-    { "what do ya want for nothing?",
-      "Jefe", 4,
-      "what do ya want for nothing?", 28,
-      "EFFCDF6A E5EB2FA2 D27416D5 F184DF9C 259A7C79" },
-    { "Fifty repetitions of \\xDD",
-      "\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA", 16,
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD", 50,
-      "D730594D 167E35D5 956FD800 3D0DB3D3 F46DC7BB" },
-  };
+TEST(Sha1Hash, TestVectors) {
+  sha1::digest_type digest;
 
-  typedef crypto::hmac<crypto::sha1> hmac_sha1;
-  typedef hmac_sha1::digest_type digest_type;
-  digest_type digest;
+  static const char *test_data[] = {
+    "abc",
+    "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "A million repetitions of 'a'"};
 
-  for (int k = 0; k < sizeof(test)/sizeof(test[0]); k++){
-    hmac_sha1 ctx(test[k].key, test[k].key_len);
-    ctx.update(test[k].data, test[k].data_len);
-    ctx.final(digest);
-    EXPECT_TRUE(IsEqual(test[k].test_data, digest, test[k].digest));
+  static const char *test_results[] = {
+    "A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D",
+    "84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1",
+    "34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F"};
+
+  for (int k = 0; k < 2; k++){
+    sha1 context;
+    context.update(test_data[k], strlen(test_data[k]));
+    context.final(digest);
+    EXPECT_TRUE(IsEqual(test_data[k], digest, test_results[k]));
+  }
+
+  {
+    sha1 context;
+    // million 'a' vector we feed separately
+    for (int k = 0; k < 1000000; k++)
+      context.update("a", 1);
+    context.final(digest);
+    EXPECT_TRUE(IsEqual(test_data[2], digest, test_results[2]));
   }
 }

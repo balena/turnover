@@ -11,23 +11,27 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <crypto/crc32.hpp>
+#include <message/detail/crypto/md5.hpp>
 #include <gtest/gtest.h>
+
+using namespace stun::detail::crypto;
 
 namespace {
 
-std::string digest_to_hex(const crypto::crc32::digest_type &digest) {
+std::string digest_to_hex(const uint8_t digest[16]) {
+  int i;
   std::ostringstream out;
-  out << std::setfill('0')
-      << std::setw(8)
-      << std::showbase
-      << std::hex
-      << *(uint32_t*)digest;
+  for (i = 0; i < 16; i++) {
+    out << std::setfill('0')
+        << std::setw(2)
+        << std::hex
+        << (int)digest[i];
+  }
   return out.str();
 }
 
 ::testing::AssertionResult IsEqual(const char *test_data,
-                                   const crypto::crc32::digest_type &digest,
+                                   const uint8_t *digest,
                                    const char *test_result) {
   std::string output = digest_to_hex(digest);
   if (strcmp(output.c_str(), test_result) == 0) {
@@ -42,29 +46,27 @@ std::string digest_to_hex(const crypto::crc32::digest_type &digest) {
 
 } // empty namespace
 
-TEST(Crc32Hash, TestVectors) {
+TEST(Md5Hash, TestVectors) {
   struct {
     const char *input;
-    const char *result;
+    const char *digest;
   } test[] = {
-    { "123456789",
-      "0xcbf43926" },
-    { "1234",
-      "0x9be3e0a3" },
+    { "",
+      "d41d8cd98f00b204e9800998ecf8427e" },
+    { "a",
+      "0cc175b9c0f1b6a831c399e269772661" },
+    { "abc",
+      "900150983cd24fb0d6963f7d28e17f72" },
+    { "message digest",
+      "f96b697d7cb7938d525a2f31aaf161d0" },
+    { "abcdefghijklmnopqrstuvwxyz",
+      "c3fcd3d76192e4007dfb496cca67e13b" },
   };
-  
-  crypto::crc32::digest_type digest;
-  for (int i = 0; i < sizeof(test)/sizeof(test[0]); i++) {
-    crypto::crc32 ctx;
-    ctx.update(test[i].input, strlen(test[i].input));
+  md5::digest_type digest;
+  for (int k = 0; k < sizeof(test)/sizeof(test[0]); k++){
+    md5 ctx;
+    ctx.update(test[k].input, strlen(test[k].input));
     ctx.final(digest);
-    EXPECT_TRUE(IsEqual(test[i].input, digest, test[i].result));
+    EXPECT_TRUE(IsEqual(test[k].input, digest, test[k].digest));
   }
-
-  // Testing partial digest
-  crypto::crc32 ctx;
-  ctx.update("1234", 4);
-  ctx.update("56789", 5);
-  ctx.final(digest);
-  EXPECT_TRUE(IsEqual("'1234' + '56789'", digest, "0xcbf43926"));
 }

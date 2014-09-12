@@ -4,16 +4,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef MESSAGE_DETAIL_CRYPTO_IMPL_HMAC_IPP
+#define MESSAGE_DETAIL_CRYPTO_IMPL_HMAC_IPP
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
+#include <message/detail/config.hpp>
+
+#include <cstring>
+
+#include <message/detail/push_options.hpp>
+
+namespace stun {
+namespace detail {
+namespace crypto {
+
 // Functions to implement RFC-2104.
 // Placed into the public domain.
 
-#include <memory.h>
-
-namespace crypto {
-
 // Encode a string using HMAC - see RFC-2104 for details.
 template<typename Digest>
-inline hmac<Digest>::hmac(const void *key, size_t key_len) {
+hmac<Digest>::hmac(const void *key, size_t key_len) {
+  using namespace std; // For memset and memcpy.
   digest_type tk;
   int i;
 
@@ -53,10 +67,6 @@ inline hmac<Digest>::hmac(const void *key, size_t key_len) {
 }
 
 template<typename Digest>
-inline hmac<Digest>::~hmac() {
-}
-
-template<typename Digest>
 inline void hmac<Digest>::update(const void *data, size_t data_len) {
   ctx_.update(data, data_len);           // then text of datagram
 }
@@ -73,3 +83,10 @@ inline void hmac<Digest>::final(typename Digest::digest_type &digest) {
 }
 
 } // namespace crypto
+} // namespace detail
+} // namespace stun
+
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_DETAIL_CRYPTO_IMPL_HMAC_IPP
+

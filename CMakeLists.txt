@@ -64,10 +64,10 @@ add_definitions(-DBOOST_ALL_NO_LIB)
 
 # Unit Tests
 add_executable(turnover_tests
-  crypto/crc32_unittest.cpp
-  crypto/sha1_unittest.cpp
-  crypto/md5_unittest.cpp
-  crypto/hmac_unittest.cpp
+  test/crc32_unittest.cpp
+  test/sha1_unittest.cpp
+  test/md5_unittest.cpp
+  test/hmac_unittest.cpp
 )
 add_dependencies(turnover_tests gtest gtest_main)
 target_link_libraries(turnover_tests gtest gtest_main)

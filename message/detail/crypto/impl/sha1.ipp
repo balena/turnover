@@ -4,6 +4,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef MESSAGE_DETAIL_CRYPTO_IMPL_SHA1_IPP
+#define MESSAGE_DETAIL_CRYPTO_IMPL_SHA1_IPP
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1200)
+# pragma once
+#endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
+
+#include <message/detail/config.hpp>
+
+#include <cstring>
+
+#include <message/detail/push_options.hpp>
+
+namespace stun {
+namespace detail {
+namespace crypto {
+
 // Implementation of SHA1 hash function.
 // Original author:  Steve Reid <sreid@sea-to-sky.net>
 // Contributions by: James H. Brown <jbrown@burgoyne.com>, Saul Kravitz
@@ -12,10 +29,6 @@
 //
 // This is free and unencumbered software released into the public domain
 // June 2013 waterjuice.org
-
-#include <memory.h>
-
-namespace crypto {
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
@@ -38,7 +51,7 @@ namespace crypto {
 #define R4(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0xCA62C1D6ul+rol(v,5);w=rol(w,30);
 
 // Hash a single 512-bit block. This is the core of the algorithm.
-inline void sha1::transform(const uint32_t data[16]) {
+void sha1::transform(const uint32_t data[16]) {
   uint32_t W[16];
   memcpy(W, data, sizeof(W));
 
@@ -88,7 +101,7 @@ inline void sha1::transform(const uint32_t data[16]) {
 #undef R3
 #undef R4
 
-inline sha1::sha1() {
+sha1::sha1() {
   // SHA1 initialization constants
   state_[0] = 0x67452301ul;
   state_[1] = 0xEFCDAB89ul;
@@ -98,10 +111,7 @@ inline sha1::sha1() {
   count_[0] = count_[1] = 0;
 }
 
-inline sha1::~sha1() {
-}
-
-inline void sha1::update(const void *data, size_t len) {
+void sha1::update(const void *data, size_t len) {
   size_t i, j;
   const uint8_t *vec = reinterpret_cast<const uint8_t*>(data);
 
@@ -120,7 +130,7 @@ inline void sha1::update(const void *data, size_t len) {
   memcpy(&buffer_[j], &vec[i], len - i);
 }
 
-inline void sha1::final(digest_type &digest) {
+void sha1::final(digest_type &digest) {
   size_t i;
   uint8_t finalcount[8];
 
@@ -139,3 +149,10 @@ inline void sha1::final(digest_type &digest) {
 }
 
 } // namespace crypto
+} // namespace detail
+} // namespace stun
+
+#include <message/detail/pop_options.hpp>
+
+#endif // MESSAGE_DETAIL_CRYPTO_IMPL_SHA1_IPP
+
