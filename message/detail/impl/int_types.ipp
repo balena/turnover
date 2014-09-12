@@ -21,167 +21,143 @@
 namespace stun {
 namespace detail {
 
-uint8::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint8::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint8::decoder::valid() const {
-  return length() == sizeof(impl_type) - basic_attribute::size;
+  return data_len_ == sizeof(impl_type);
 }
 
 uint8_t uint8::decoder::value() const {
-  return p_->value;
+  return data_->value;
 }
 
-uint8::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(impl_type) - basic_attribute::size);
-  memset(&p_->unused, 0, sizeof(p_->unused));
+uint8::encoder::encoder(uint8_t* data)
+  : data_(reinterpret_cast<impl_type*>(data)) {
+  using namespace std; // For memset.
+  memset(&data_->unused, 0, sizeof(data_->unused));
 }
 
 void uint8::encoder::set_value(uint8_t value) {
-  p_->value = value;
+  data_->value = value;
 }
 
 
-uint8_pad::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint8_pad::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint8_pad::decoder::valid() const {
-  return length() == sizeof(p_->value);
+  return data_len_ == sizeof(data_->value);
 }
 
 uint8_t uint8_pad::decoder::value() const {
-  return p_->value;
+  return data_->value;
 }
 
-uint8_pad::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr,
-    uint8_t pad)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(p_->value));
-  memset(&p_->unused, pad, sizeof(p_->unused));
+uint8_pad::encoder::encoder(uint8_t* data, uint8_t pad)
+  : data_(reinterpret_cast<impl_type*>(data)) {
+  using namespace std; // For memset.
+  memset(&data_->unused, pad, sizeof(data_->unused));
 }
 
 void uint8_pad::encoder::set_value(uint8_t value) {
-  p_->value = value;
+  data_->value = value;
 }
 
 
-uint16::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint16::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint16::decoder::valid() const {
-  return length() == sizeof(impl_type) - basic_attribute::size;
+  return data_len_ == sizeof(impl_type);
 }
 
 uint16_t uint16::decoder::value() const {
-  using namespace ::stun::detail::byte_order;
-  return network_to_host_short(p_->value);
+  return network_to_host_short(data_->value);
 }
 
-uint16::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(impl_type) - basic_attribute::size);
-  memset(&p_->unused, 0, sizeof(p_->unused));
+uint16::encoder::encoder(uint8_t* data)
+  : data_(reinterpret_cast<impl_type*>(data)) {
+  using namespace std; // For memset.
+  memset(&data_->unused, 0, sizeof(data_->unused));
 }
 
 void uint16::encoder::set_value(uint16_t value) {
-  using namespace ::stun::detail::byte_order;
-  p_->value = host_to_network_short(value);
+  data_->value = host_to_network_short(value);
 }
 
 
-uint16_pad::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint16_pad::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint16_pad::decoder::valid() const {
-  return length() == sizeof(p_->value);
+  return data_len_ == sizeof(data_->value);
 }
 
 uint16_t uint16_pad::decoder::value() const {
-  using namespace ::stun::detail::byte_order;
-  return network_to_host_short(p_->value);
+  return network_to_host_short(data_->value);
 }
 
-uint16_pad::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr,
-    uint8_t pad)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(p_->value));
-  memset(&p_->unused, pad, sizeof(p_->unused));
+uint16_pad::encoder::encoder(uint8_t* data, uint8_t pad)
+  : data_(reinterpret_cast<impl_type*>(data)) {
+  using namespace std; // For memset.
+  memset(&data_->unused, pad, sizeof(data_->unused));
 }
 
 void uint16_pad::encoder::set_value(uint16_t value) {
-  using namespace ::stun::detail::byte_order;
-  p_->value = host_to_network_short(value);
+  data_->value = host_to_network_short(value);
 }
 
 
-uint32::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint32::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint32::decoder::valid() const {
-  return length() == sizeof(impl_type) - basic_attribute::size;
+  return data_len_ == sizeof(impl_type);
 }
 
 uint32_t uint32::decoder::value() const {
-  using namespace ::stun::detail::byte_order;
-  return network_to_host_long(p_->value);
+  return network_to_host_long(data_->value);
 }
 
-uint32::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(impl_type) - basic_attribute::size);
+uint32::encoder::encoder(uint8_t* data)
+  : data_(reinterpret_cast<impl_type*>(data)) {
 }
 
 void uint32::encoder::set_value(uint32_t value) {
-  using namespace ::stun::detail::byte_order;
-  p_->value = host_to_network_long(value);
+  data_->value = host_to_network_long(value);
 }
 
 
-uint64::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+uint64::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 bool uint64::decoder::valid() const {
-  return length() == sizeof(impl_type) - basic_attribute::size;
+  return data_len_ == sizeof(impl_type);
 }
 
 uint64_t uint64::decoder::value() const {
-  using namespace ::stun::detail::byte_order;
-  return network_to_host_long_long(p_->value);
+  return network_to_host_long_long(data_->value);
 }
 
-uint64::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
-  using namespace std;
-  set_length(sizeof(impl_type) - basic_attribute::size);
+uint64::encoder::encoder(uint8_t* data)
+  : data_(reinterpret_cast<impl_type*>(data)) {
 }
 
 void uint64::encoder::set_value(uint64_t value) {
-  using namespace ::stun::detail::byte_order;
-  p_->value = host_to_network_long_long(value);
+  data_->value = host_to_network_long_long(value);
 }
 
 } // namespace detail

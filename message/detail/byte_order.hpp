@@ -19,7 +19,6 @@
 
 namespace stun {
 namespace detail {
-namespace byte_order {
 
 MESSAGE_DECL uint32_t network_to_host_long(uint32_t value);
 
@@ -33,7 +32,6 @@ MESSAGE_DECL uint64_t network_to_host_long_long(uint64_t value);
 
 MESSAGE_DECL uint64_t host_to_network_long_long(uint64_t value);
 
-} // namespace byte_order
 } // namespace detail
 } // namespace stun
 

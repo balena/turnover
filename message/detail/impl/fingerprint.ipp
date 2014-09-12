@@ -14,6 +14,7 @@
 #include <message/detail/config.hpp>
 
 #include <crypto/crc32.hpp>
+#include <message/detail/attribute_header.hpp>
 #include <message/detail/byte_order.hpp>
 
 #include <message/detail/push_options.hpp>
@@ -21,36 +22,36 @@
 namespace stun {
 namespace detail {
 
-uint32_t fingerprint::digest(const message_header::impl_type *header) {
+fingerprint::decoder::decoder(const uint8_t* message_header,
+    const uint8_t* data, size_t data_len)
+  : uint32::decoder(data, data_len),
+    message_header_(reinterpret_cast<const header_type*>(message_header)) {
+}
+
+bool fingerprint::decoder::check() const {
+  return digest(message_header_) == value();
+}
+
+fingerprint::encoder::encoder(const uint8_t* message_header, uint8_t* data)
+  : uint32::encoder(data),
+    message_header_(reinterpret_cast<const header_type*>(message_header)) {
+}
+
+void fingerprint::encoder::sign() {
+  set_value(digest(message_header_));
+}
+
+uint32_t fingerprint::digest(const header_type *header) {
   using namespace crypto;
-  using namespace ::stun::detail::byte_order;
   size_t n = message_header::size
       + network_to_host_short(header->length)
-      - uint32::size;
+      - (attribute_header::size + uint32::size);
   crc32::digest_type digest;
   crc32 ctx;
   ctx.update(header, n);
   ctx.final(digest);
   digest ^= xor_fingerprint;
   return digest;
-}
-
-fingerprint::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : header_((const message_header::impl_type*)msg_hdr),
-    uint32::decoder(msg_hdr, attr_hdr) {
-}
-
-bool fingerprint::decoder::check() const {
-  return digest(header_) == value();
-}
-
-fingerprint::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : header_((message_header::impl_type*)msg_hdr),
-    uint32::encoder(msg_hdr, attr_hdr) {
-}
-
-void fingerprint::encoder::sign() {
-  set_value(digest(header_));
 }
 
 } // namespace detail

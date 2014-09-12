@@ -15,8 +15,6 @@
 
 #include <boost/asio/ip/address.hpp>
 
-#include <message/detail/basic_attribute.hpp>
-
 #include <message/detail/push_options.hpp>
 
 namespace stun {
@@ -24,7 +22,7 @@ namespace detail {
 
 struct endpoint {
 #pragma pack(push, 1)
-  struct impl_type : public basic_attribute::impl_type {
+  struct impl_type {
     uint8_t unused;
     uint8_t family; // IPv4 = 1, IPv6 = 2
     uint16_t port;
@@ -34,29 +32,30 @@ struct endpoint {
     } addr;
   };
 #pragma pack(pop)
-
   typedef boost::asio::ip::address address_type;
 
-  class decoder : public basic_attribute::decoder {
+  class decoder {
    public:
-    typedef endpoint::address_type address_type;
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL decoder(const uint8_t* data, size_t data_len);
     MESSAGE_DECL bool valid() const;
     MESSAGE_DECL address_type address() const;
     MESSAGE_DECL uint16_t port() const;
    private:
-    const impl_type* p_;
+    const impl_type* data_;
+    size_t data_len_;
   };
 
-  class encoder : public basic_attribute::encoder {
+  class encoder {
    public:
-    typedef endpoint::address_type address_type;
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(uint8_t* data);
     MESSAGE_DECL void set_address(const address_type &address);
     MESSAGE_DECL void set_port(uint16_t port);
    private:
-    impl_type* p_;
+    impl_type* data_;
   };
+
+  MESSAGE_DECL static size_t size_of(uint8_t family);
+  MESSAGE_DECL static size_t size_of(const address_type &address);
 };
 
 } // namespace detail

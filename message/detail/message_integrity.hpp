@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_MSGINT_HPP
-#define MESSAGE_DETAIL_MSGINT_HPP
+#ifndef MESSAGE_DETAIL_MESSAGE_INTEGRITY_HPP
+#define MESSAGE_DETAIL_MESSAGE_INTEGRITY_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -13,7 +13,6 @@
 
 #include <message/detail/config.hpp>
 
-#include <message/detail/basic_attribute.hpp>
 #include <message/detail/message_header.hpp>
 #include <string>
 
@@ -22,34 +21,34 @@
 namespace stun {
 namespace detail {
 
-struct msgint {
+struct message_integrity {
 #pragma pack(push, 1)
-  struct impl_type : public basic_attribute::impl_type {
+  struct impl_type {
     uint8_t hmac[20]; // HMAC-SHA1 hash
   };
 #pragma pack(pop)
   static const size_t size = sizeof(impl_type);
-  typedef ::stun::detail::message_header message_header;
+  typedef message_header::impl_type header_type;
 
-  class decoder : public basic_attribute::decoder {
+  class decoder {
    public:
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL decoder(const uint8_t* message_header, const uint8_t* data,
+        size_t data_len);
     MESSAGE_DECL bool valid() const;
     MESSAGE_DECL bool check(const uint8_t* key, size_t key_len) const;
    private:
-    const message_header::impl_type* hdr_;
-    ::stun::detail::message_header::decoder hdr_decoder_;
-    const impl_type* p_;
+    const header_type* message_header_;
+    const impl_type* data_;
+    size_t data_len_;
   };
 
-  class encoder : public basic_attribute::encoder {
+  class encoder {
    public:
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(const uint8_t* message_header, uint8_t* data);
     MESSAGE_DECL void sign(const uint8_t* key, size_t key_len);
    private:
-    const message_header::impl_type* hdr_;
-    message_header::decoder hdr_decoder_;
-    impl_type* p_;
+    const header_type* message_header_;
+    impl_type* data_;
   };
 };
 
@@ -59,8 +58,8 @@ struct msgint {
 #include <message/detail/pop_options.hpp>
 
 #if defined(MESSAGE_HEADER_ONLY)
-#include <message/detail/impl/msgint.ipp>
+#include <message/detail/impl/message_integrity.ipp>
 #endif // defined(MESSAGE_HEADER_ONLY)
 
-#endif // MESSAGE_DETAIL_MSGINT_HPP
+#endif // MESSAGE_DETAIL_MESSAGE_INTEGRITY_HPP
 

@@ -20,44 +20,44 @@
 namespace stun {
 namespace detail {
 
-message_header::decoder::decoder(const uint8_t* msg_hdr)
-  : p_((const impl_type*)msg_hdr) {
+message_header::decoder::decoder(const uint8_t* message_header)
+  : message_header_(reinterpret_cast<const impl_type*>(message_header)) {
 }
 
 uint16_t message_header::decoder::type() const {
-  return byte_order::network_to_host_short(p_->type);
+  return network_to_host_short(message_header_->type);
 }
 
 uint16_t message_header::decoder::length() const {
-  return byte_order::network_to_host_short(p_->length);
+  return network_to_host_short(message_header_->length);
 }
 
 uint32_t message_header::decoder::magic() const {
-  return byte_order::network_to_host_long(p_->magic);
+  return network_to_host_long(message_header_->magic);
 }
 
 const message_header::tsx_id_type &message_header::decoder::tsx_id() const {
-  return p_->tsx_id;
+  return message_header_->tsx_id;
 }
 
-message_header::encoder::encoder(uint8_t* msg_hdr)
-  : p_((impl_type*)msg_hdr) {
+message_header::encoder::encoder(uint8_t* message_header)
+  : message_header_(reinterpret_cast<impl_type*>(message_header)) {
 }
 
 void message_header::encoder::set_type(uint16_t type) {
-  p_->type = byte_order::host_to_network_short(type);
+  message_header_->type = host_to_network_short(type);
 }
 
 void message_header::encoder::set_length(uint16_t length) {
-  p_->length = byte_order::host_to_network_short(length);
+  message_header_->length = host_to_network_short(length);
 }
 
 void message_header::encoder::set_magic(uint32_t magic) {
-  p_->magic = byte_order::host_to_network_long(magic);
+  message_header_->magic = host_to_network_long(magic);
 }
 
 void message_header::encoder::set_tsx_id(const tsx_id_type &tsx_id) {
-  p_->tsx_id = tsx_id;
+  message_header_->tsx_id = tsx_id;
 }
 
 } // namespace detail

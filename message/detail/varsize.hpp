@@ -13,7 +13,6 @@
 
 #include <message/detail/config.hpp>
 
-#include <message/detail/basic_attribute.hpp>
 #include <string>
 
 #include <message/detail/push_options.hpp>
@@ -23,29 +22,30 @@ namespace detail {
 
 struct varsize {
 #pragma pack(push, 1)
-  struct impl_type : public basic_attribute::impl_type {
+  struct impl_type {
     uint8_t value[1];    // variable size value
   };
 #pragma pack(pop)
 
-  class decoder : public basic_attribute::decoder {
+  class decoder {
    public:
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    MESSAGE_DECL bool valid() const { return true; }
+    MESSAGE_DECL decoder(const uint8_t* data, size_t data_len);
+    bool valid() const { return true; }
     MESSAGE_DECL const uint8_t *data() const;
     MESSAGE_DECL size_t size() const;
     MESSAGE_DECL std::string to_string() const;
    private:
-    const impl_type* p_;
+    const impl_type* data_;
+    size_t data_len_;
   };
 
-  class encoder : public basic_attribute::encoder {
+  class encoder {
    public:
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(uint8_t* data);
     MESSAGE_DECL void assign(const uint8_t *data, size_t data_len,
         uint8_t pad);
    private:
-    impl_type* p_;
+    impl_type* data_;
   };
 };
 

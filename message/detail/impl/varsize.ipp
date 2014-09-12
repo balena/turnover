@@ -21,34 +21,32 @@
 namespace stun {
 namespace detail {
 
-varsize::decoder::decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const impl_type*)attr_hdr) {
+varsize::decoder::decoder(const uint8_t* data, size_t data_len)
+  : data_(reinterpret_cast<const impl_type*>(data)),
+    data_len_(data_len) {
 }
 
 const uint8_t *varsize::decoder::data() const {
-  return p_->value;
+  return data_->value;
 }
 
 size_t varsize::decoder::size() const {
-  return length();
+  return data_len_;
 }
 
 std::string varsize::decoder::to_string() const {
-  return std::string((const char*)p_->value, length());
+  return std::string((const char*)data_->value, data_len_);
 }
 
-varsize::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((impl_type*)attr_hdr) {
+varsize::encoder::encoder(uint8_t* data)
+  : data_(reinterpret_cast<impl_type*>(data)) {
 }
 
 void varsize::encoder::assign(const uint8_t *data, size_t data_len,
     uint8_t pad) {
-  using namespace std; // For memcpy and memset.
-  memcpy(p_->value, data, data_len);
-  append_padding(p_->value + data_len, data_len, pad);
-  set_length(data_len);
+  using namespace std; // For memcpy.
+  memcpy(data_->value, data, data_len);
+  append_padding(data_->value + data_len, data_len, pad);
 }
 
 } // namespace detail

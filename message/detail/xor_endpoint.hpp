@@ -24,30 +24,36 @@ namespace detail {
 struct xor_endpoint {
   typedef endpoint::impl_type impl_type;
   typedef endpoint::address_type address_type;
-  typedef ::stun::detail::message_header message_header;
+  typedef message_header::impl_type header_type;
 
-  class decoder : public basic_attribute::decoder {
+  class decoder : public endpoint::decoder {
    public:
-    typedef endpoint::address_type address_type;
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
-    MESSAGE_DECL bool valid() const;
+    MESSAGE_DECL decoder(const uint8_t* message_header,
+        const uint8_t* data, size_t data_len);
+    bool valid() const { return endpoint::decoder::valid(); }
     MESSAGE_DECL address_type address() const;
     MESSAGE_DECL uint16_t port() const;
    private:
-    const message_header::impl_type* p_;
-    endpoint::decoder base_;
+    const header_type* message_header_;
   };
 
-  class encoder : public basic_attribute::encoder {
+  class encoder : public endpoint::encoder {
    public:
-    typedef endpoint::address_type address_type;
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(const uint8_t* message_header, uint8_t* data);
     MESSAGE_DECL void set_address(const address_type &address);
     MESSAGE_DECL void set_port(uint16_t port);
    private:
-    message_header::impl_type* p_;
-    endpoint::encoder base_;
+    const header_type* message_header_;
   };
+
+  MESSAGE_DECL static address_type mask(const header_type* message_header,
+      const address_type &address);
+  MESSAGE_DECL static uint16_t mask(const header_type* message_header,
+      uint16_t port);
+
+  static size_t size_of(const address_type &address) {
+    return endpoint::size_of(address);
+  }
 };
 
 } // namespace detail

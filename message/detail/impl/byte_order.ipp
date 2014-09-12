@@ -19,7 +19,6 @@
 
 namespace stun {
 namespace detail {
-namespace byte_order {
 
 uint32_t network_to_host_long(uint32_t value) {
   // Forward to Boost.Asio implementation
@@ -72,7 +71,6 @@ uint64_t host_to_network_long_long(uint64_t value) {
   return result;
 }
 
-} // namespace byte_order
 } // namespace detail
 } // namespace stun
 

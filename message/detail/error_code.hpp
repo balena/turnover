@@ -13,8 +13,6 @@
 
 #include <message/detail/config.hpp>
 
-#include <message/detail/basic_attribute.hpp>
-
 #include <message/detail/push_options.hpp>
 
 namespace stun {
@@ -22,7 +20,7 @@ namespace detail {
 
 struct error_code {
 #pragma pack(push, 1)
-  struct impl_type : public basic_attribute::impl_type {
+  struct impl_type {
     uint16_t unused;
     uint8_t err_class;   // code / 100
     uint8_t err_code;    // code % 100
@@ -30,27 +28,28 @@ struct error_code {
   };
 #pragma pack(pop)
 
-  class decoder : public basic_attribute::decoder {
+  class decoder {
    public:
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL decoder(const uint8_t* data, size_t data_len);
     MESSAGE_DECL bool valid() const;
-    int status_code() const { return error_class() * 100 + error_code(); }
-    MESSAGE_DECL int error_class() const;
-    MESSAGE_DECL int error_code() const;
+    MESSAGE_DECL int status_code() const;
     MESSAGE_DECL std::string reason_phrase() const;
    private:
-    const impl_type* p_;
+    const impl_type* data_;
+    size_t data_len_;
   };
 
-  class encoder : public basic_attribute::encoder {
+  class encoder {
    public:
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(uint8_t* data);
     MESSAGE_DECL void set_status_code(int status);
     MESSAGE_DECL void set_reason_phrase(const char* s, size_t len,
         uint8_t pad);
    private:
-    impl_type* p_;
+    impl_type* data_;
   };
+
+  MESSAGE_DECL static size_t size_of(size_t reason_len);
 };
 
 } // namespace detail

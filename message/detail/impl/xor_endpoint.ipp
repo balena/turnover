@@ -20,82 +20,59 @@
 namespace stun {
 namespace detail {
 
-xor_endpoint::decoder::decoder(const uint8_t* msg_hdr,
-    const uint8_t* attr_hdr)
-  : basic_attribute::decoder(msg_hdr, attr_hdr),
-    p_((const message_header::impl_type*)attr_hdr),
-    base_(msg_hdr, attr_hdr) {
-}
-
-bool xor_endpoint::decoder::valid() const {
-  return base_.valid();
+xor_endpoint::decoder::decoder(const uint8_t* message_header,
+    const uint8_t* data, size_t data_len)
+    : endpoint::decoder(data, data_len),
+      message_header_(reinterpret_cast<const header_type*>(message_header)) {
 }
 
 xor_endpoint::address_type xor_endpoint::decoder::address() const {
-  using boost::asio::ip::address_v4;
-  using boost::asio::ip::address_v6;
-  address_type result(base_.address());
-  if (result.is_v4()) {
-    address_v4::bytes_type bytes(result.to_v4().to_bytes());
-    uint8_t *p = bytes.data();
-    *((uint32_t*)p) ^= p_->magic;
-    result = address_type(address_v4(bytes));
-  } else {
-    address_v6::bytes_type bytes(result.to_v6().to_bytes());
-    uint8_t *p = bytes.data();
-    *((uint32_t*)p) ^= p_->magic;
-    p += sizeof(uint32_t);
-    // rest of IPv6 address has to be XOR'ed with the transaction id
-    *p++ ^= p_->tsx_id.u8[0];  *p++ ^= p_->tsx_id.u8[1];
-    *p++ ^= p_->tsx_id.u8[2];  *p++ ^= p_->tsx_id.u8[3];
-    *p++ ^= p_->tsx_id.u8[4];  *p++ ^= p_->tsx_id.u8[5];
-    *p++ ^= p_->tsx_id.u8[6];  *p++ ^= p_->tsx_id.u8[7];
-    *p++ ^= p_->tsx_id.u8[8];  *p++ ^= p_->tsx_id.u8[9];
-    *p++ ^= p_->tsx_id.u8[10]; *p++ ^= p_->tsx_id.u8[11];
-    result = address_type(address_v6(bytes));
-  }
-  return result;
+  return mask(message_header_, endpoint::decoder::address());
 }
 
 uint16_t xor_endpoint::decoder::port() const {
-  using namespace ::stun::detail::byte_order;
-  return base_.port() ^ (uint16_t)(network_to_host_long(p_->magic) >> 16);
+  return mask(message_header_, endpoint::decoder::port());
 }
 
-xor_endpoint::encoder::encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr)
-  : basic_attribute::encoder(msg_hdr, attr_hdr),
-    p_((message_header::impl_type*)msg_hdr),
-    base_(msg_hdr, attr_hdr) {
+xor_endpoint::encoder::encoder(const uint8_t* message_header, uint8_t* data)
+    : endpoint::encoder(data),
+      message_header_(reinterpret_cast<const header_type*>(message_header)) {
 }
 
 void xor_endpoint::encoder::set_address(const address_type &address) {
-  using boost::asio::ip::address_v4;
-  using boost::asio::ip::address_v6;
-  address_type input;
-  if (address.is_v4()) {
-    address_v4::bytes_type bytes(address.to_v4().to_bytes());
-    uint8_t *p = bytes.data();
-    *((uint32_t*)p) ^= p_->magic;
-    base_.set_address(address_v4(bytes));
-  } else {
-    address_v6::bytes_type bytes(address.to_v6().to_bytes());
-    uint8_t *p = bytes.data();
-    *((uint32_t*)p) ^= p_->magic;
-    p += sizeof(uint32_t);
-    // rest of IPv6 address has to be XOR'ed with the transaction id
-    *p++ ^= p_->tsx_id.u8[0];  *p++ ^= p_->tsx_id.u8[1];
-    *p++ ^= p_->tsx_id.u8[2];  *p++ ^= p_->tsx_id.u8[3];
-    *p++ ^= p_->tsx_id.u8[4];  *p++ ^= p_->tsx_id.u8[5];
-    *p++ ^= p_->tsx_id.u8[6];  *p++ ^= p_->tsx_id.u8[7];
-    *p++ ^= p_->tsx_id.u8[8];  *p++ ^= p_->tsx_id.u8[9];
-    *p++ ^= p_->tsx_id.u8[10]; *p++ ^= p_->tsx_id.u8[11];
-    base_.set_address(address_v6(bytes));
-  }
+  endpoint::encoder::set_address(mask(message_header_, address));
 }
 
 void xor_endpoint::encoder::set_port(uint16_t port) {
-  using namespace ::stun::detail::byte_order;
-  base_.set_port(port ^ (uint16_t)(network_to_host_long(p_->magic) >> 16));
+  endpoint::encoder::set_port(mask(message_header_, port));
+}
+
+xor_endpoint::address_type
+    xor_endpoint::mask(const header_type* message_header,
+        const address_type &address) {
+  using boost::asio::ip::address_v4;
+  using boost::asio::ip::address_v6;
+  if (address.is_v4()) {
+    address_v4::bytes_type bytes(address.to_v4().to_bytes());
+    uint8_t *p = bytes.data();
+    *((uint32_t*)p) ^= message_header->magic;
+    return address_type(address_v4(bytes));
+  } else {
+    address_v6::bytes_type bytes(address.to_v6().to_bytes());
+    uint8_t *p = bytes.data();
+    *((uint32_t*)p) ^= message_header->magic;
+    p += sizeof(uint32_t);
+    const uint8_t *q = message_header->tsx_id.u8;
+    // rest of IPv6 address has to be XOR'ed with the transaction id
+    *p++ ^= q[0]; *p++ ^= q[1]; *p++ ^= q[2];  *p++ ^= q[3];
+    *p++ ^= q[4]; *p++ ^= q[5]; *p++ ^= q[6];  *p++ ^= q[7];
+    *p++ ^= q[8]; *p++ ^= q[9]; *p++ ^= q[10]; *p++ ^= q[11];
+    return address_type(address_v6(bytes));
+  }
+}
+
+uint16_t xor_endpoint::mask(const header_type* message_header, uint16_t port) {
+  return port ^ (uint16_t)(network_to_host_long(message_header->magic) >> 16);
 }
 
 } // namespace detail

@@ -23,26 +23,28 @@ namespace detail {
 
 struct fingerprint {
   typedef uint32::impl_type impl_type;
-  typedef ::stun::detail::message_header message_header;
+  typedef message_header::impl_type header_type;
 
   static const uint32_t xor_fingerprint = 0x5354554euL;
-  MESSAGE_DECL static uint32_t digest(const message_header::impl_type *header);
 
   class decoder : public uint32::decoder {
    public:
-    MESSAGE_DECL decoder(const uint8_t* msg_hdr, const uint8_t* attr_hdr);
+    MESSAGE_DECL decoder(const uint8_t* message_header,
+        const uint8_t* data, size_t data_len);
     MESSAGE_DECL bool check() const;
    private:
-    const message_header::impl_type* header_;
+    const header_type* message_header_;
   };
 
   class encoder : public uint32::encoder {
    public:
-    MESSAGE_DECL encoder(const uint8_t* msg_hdr, uint8_t* attr_hdr);
+    MESSAGE_DECL encoder(const uint8_t* message_header, uint8_t* data);
     MESSAGE_DECL void sign();
    private:
-    const message_header::impl_type* header_;
+    const header_type* message_header_;
   };
+
+  MESSAGE_DECL static uint32_t digest(const header_type *header);
 };
 
 } // namespace detail
