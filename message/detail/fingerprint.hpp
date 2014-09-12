@@ -24,6 +24,7 @@ namespace detail {
 struct fingerprint {
   typedef uint32::impl_type impl_type;
   typedef message_header::impl_type header_type;
+  static const size_t size = uint32::size;
 
   static const uint32_t xor_fingerprint = 0x5354554euL;
 
