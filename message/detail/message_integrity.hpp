@@ -15,6 +15,7 @@
 
 #include <message/detail/message_header.hpp>
 #include <string>
+#include <cstring>
 
 #include <message/detail/push_options.hpp>
 
@@ -36,6 +37,13 @@ struct message_integrity {
         size_t data_len);
     MESSAGE_DECL bool valid() const;
     MESSAGE_DECL bool check(const uint8_t* key, size_t key_len) const;
+    bool check(const char* key) const {
+      using namespace std; // For strlen
+      return check(reinterpret_cast<const uint8_t*>(key), strlen(key));
+    }
+    bool check(const std::string& key) const {
+      return check(reinterpret_cast<const uint8_t*>(key.data()), key.size());
+    }
    private:
     const header_type* message_header_;
     const impl_type* data_;

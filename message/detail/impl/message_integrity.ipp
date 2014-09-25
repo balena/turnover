@@ -16,6 +16,7 @@
 #include <message/attribute/type.hpp>
 #include <message/detail/int_types.hpp>
 #include <message/detail/byte_order.hpp>
+#include <message/detail/message_header.hpp>
 #include <message/detail/attribute_header.hpp>
 
 #include <message/detail/crypto/sha1.hpp>
@@ -72,14 +73,14 @@ bool message_integrity::decoder::check(const uint8_t* key, size_t key_len) const
       return false;
     }
   }
-  hmac_sha1::digest_type digest;
+  hmac_sha1::bytes_type digest;
   hmac_sha1 ctx(key, key_len);
   ctx.update(&message_header_->type, sizeof(message_header_->type));
   ctx.update(&message_length, sizeof(message_length));
   p += sizeof(message_header_->type) + sizeof(message_length);
   ctx.update(p, p_end - p);
-  ctx.final(digest);
-  return memcmp(digest, data_->hmac, sizeof(digest)) == 0 ? true : false;
+  digest = ctx.to_bytes();
+  return memcmp(digest.data(), data_->hmac, digest.size()) == 0 ? true : false;
 }
 
 message_integrity::encoder::encoder(const uint8_t* message_header, uint8_t* data)
@@ -90,10 +91,12 @@ message_integrity::encoder::encoder(const uint8_t* message_header, uint8_t* data
 void message_integrity::encoder::sign(const uint8_t* key, size_t key_len) {
   typedef crypto::hmac<crypto::sha1> hmac_sha1;
   hmac_sha1 ctx(key, key_len);
-  ctx.update(message_header_,
-      network_to_host_short(message_header_->length)
+  ctx.update(message_header_, message_header::size
+      + network_to_host_short(message_header_->length)
           - (attribute_header::size + size));
-  ctx.final(data_->hmac);
+  hmac_sha1::bytes_type digest;
+  digest = ctx.to_bytes();
+  memcpy(data_->hmac, digest.data(), digest.size());
 }
 
 } // namespace detail

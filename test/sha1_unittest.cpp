@@ -18,7 +18,7 @@ using namespace stun::detail::crypto;
 
 namespace {
 
-std::string digest_to_hex(const uint8_t digest[20]) {
+std::string digest_to_hex(const sha1::bytes_type& digest) {
   int i,j;
   std::ostringstream out;
   for (i = 0; i < 20/4; i++) {
@@ -36,10 +36,10 @@ std::string digest_to_hex(const uint8_t digest[20]) {
 }
 
 ::testing::AssertionResult IsEqual(const char *test_data,
-                                   const uint8_t *digest,
+                                   const sha1::bytes_type& digest,
                                    const char *test_result) {
   std::string output = digest_to_hex(digest);
-  if (strcmp(output.c_str(), test_result) == 0) {
+  if (output == test_result) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()
@@ -52,8 +52,6 @@ std::string digest_to_hex(const uint8_t digest[20]) {
 } // empty namespace
 
 TEST(Sha1Hash, TestVectors) {
-  sha1::digest_type digest;
-
   static const char *test_data[] = {
     "abc",
     "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
@@ -67,8 +65,7 @@ TEST(Sha1Hash, TestVectors) {
   for (int k = 0; k < 2; k++){
     sha1 context;
     context.update(test_data[k], strlen(test_data[k]));
-    context.final(digest);
-    EXPECT_TRUE(IsEqual(test_data[k], digest, test_results[k]));
+    EXPECT_TRUE(IsEqual(test_data[k], context.to_bytes(), test_results[k]));
   }
 
   {
@@ -76,7 +73,6 @@ TEST(Sha1Hash, TestVectors) {
     // million 'a' vector we feed separately
     for (int k = 0; k < 1000000; k++)
       context.update("a", 1);
-    context.final(digest);
-    EXPECT_TRUE(IsEqual(test_data[2], digest, test_results[2]));
+    EXPECT_TRUE(IsEqual(test_data[2], context.to_bytes(), test_results[2]));
   }
 }

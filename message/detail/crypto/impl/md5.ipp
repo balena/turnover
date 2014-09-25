@@ -266,7 +266,7 @@ void md5::update(const void *data, size_t size) {
   memcpy(buffer_, data, size);
 }
 
-void md5::final(digest_type &digest) {
+md5::bytes_type md5::to_bytes() {
   using namespace std; // For memset.
   size_t used, available;
 
@@ -297,6 +297,7 @@ void md5::final(digest_type &digest) {
 
   body(buffer_, 64);
 
+  bytes_type digest;
   digest[0] = (uint8_t)a_;
   digest[1] = (uint8_t)(a_ >> 8);
   digest[2] = (uint8_t)(a_ >> 16);
@@ -313,6 +314,7 @@ void md5::final(digest_type &digest) {
   digest[13] = (uint8_t)(d_ >> 8);
   digest[14] = (uint8_t)(d_ >> 16);
   digest[15] = (uint8_t)(d_ >> 24);
+  return digest;
 }
 
 } // namespace crypto

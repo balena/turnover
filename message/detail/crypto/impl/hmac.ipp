@@ -28,7 +28,7 @@ namespace crypto {
 template<typename Digest>
 hmac<Digest>::hmac(const void *key, size_t key_len) {
   using namespace std; // For memset and memcpy.
-  digest_type tk;
+  bytes_type tk;
   int i;
 
   // if key is longer than block_size reset it to key=digest(key)
@@ -36,10 +36,10 @@ hmac<Digest>::hmac(const void *key, size_t key_len) {
     Digest ctx;
 
     ctx.update(key, key_len);
-    ctx.final(tk);
+    tk = ctx.to_bytes();
 
-    key = reinterpret_cast<const uint8_t*>(tk);
-    key_len = sizeof(tk);
+    key = tk.data();
+    key_len = tk.size();
   }
 
   // the HMAC transform looks like:
@@ -72,14 +72,15 @@ inline void hmac<Digest>::update(const void *data, size_t data_len) {
 }
 
 template<typename Digest>
-inline void hmac<Digest>::final(typename Digest::digest_type &digest) {
-  ctx_.final(digest);                    // finish up 1st pass
+inline typename hmac<Digest>::bytes_type hmac<Digest>::to_bytes() {
+  bytes_type digest;
+  digest = ctx_.to_bytes();              // finish up 1st pass
 
   // perform outer SHA1
   new (&ctx_) Digest();                  // init context for 2nd pass
   ctx_.update(k_opad_, sizeof(k_opad_)); // start with outer pad
-  ctx_.update(digest, sizeof(digest));   // then results of 1st hash
-  ctx_.final(digest);                    // finish up 2nd pass
+  ctx_.update(digest.data(), digest.size()); // then results of 1st hash
+  return ctx_.to_bytes();                // finish up 2nd pass
 }
 
 } // namespace crypto

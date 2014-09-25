@@ -12,26 +12,24 @@
 #include <iomanip>
 #include <cstring>
 #include <message/detail/crypto/crc32.hpp>
-#include <message/detail/message_integrity.hpp>
-#include <message/detail/fingerprint.hpp>
 #include <gtest/gtest.h>
 
 using namespace stun::detail::crypto;
 
 namespace {
 
-std::string digest_to_hex(const crc32::digest_type &digest) {
+std::string digest_to_hex(const crc32::bytes_type &digest) {
   std::ostringstream out;
   out << std::setfill('0')
       << std::setw(8)
       << std::showbase
       << std::hex
-      << *(uint32_t*)digest;
+      << *(uint32_t*)digest.data();
   return out.str();
 }
 
 ::testing::AssertionResult IsEqual(const char *test_data,
-                                   const crc32::digest_type &digest,
+                                   const crc32::bytes_type &digest,
                                    const char *test_result) {
   std::string output = digest_to_hex(digest);
   if (strcmp(output.c_str(), test_result) == 0) {
@@ -57,18 +55,15 @@ TEST(Crc32Hash, TestVectors) {
       "0x9be3e0a3" },
   };
   
-  crc32::digest_type digest;
   for (int i = 0; i < sizeof(test)/sizeof(test[0]); i++) {
     crc32 ctx;
     ctx.update(test[i].input, strlen(test[i].input));
-    ctx.final(digest);
-    EXPECT_TRUE(IsEqual(test[i].input, digest, test[i].result));
+    EXPECT_TRUE(IsEqual(test[i].input, ctx.to_bytes(), test[i].result));
   }
 
   // Testing partial digest
   crc32 ctx;
   ctx.update("1234", 4);
   ctx.update("56789", 5);
-  ctx.final(digest);
-  EXPECT_TRUE(IsEqual("'1234' + '56789'", digest, "0xcbf43926"));
+  EXPECT_TRUE(IsEqual("'1234' + '56789'", ctx.to_bytes(), "0xcbf43926"));
 }

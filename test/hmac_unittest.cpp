@@ -17,9 +17,11 @@
 
 using namespace stun::detail::crypto;
 
+typedef hmac<sha1> hmac_sha1;
+
 namespace {
 
-std::string digest_to_hex(const uint8_t digest[20]) {
+std::string digest_to_hex(const hmac_sha1::bytes_type& digest) {
   int i,j;
   std::ostringstream out;
   for (i = 0; i < 20/4; i++) {
@@ -37,10 +39,10 @@ std::string digest_to_hex(const uint8_t digest[20]) {
 }
 
 ::testing::AssertionResult IsEqual(const char *test_data,
-                                   const uint8_t *digest,
+                                   const hmac_sha1::bytes_type& digest,
                                    const char *test_result) {
   std::string output = digest_to_hex(digest);
-  if (strcmp(output.c_str(), test_result) == 0) {
+  if (output == test_result) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()
@@ -77,14 +79,9 @@ TEST(HmacSha1Hash, TestVectors) {
       "D730594D 167E35D5 956FD800 3D0DB3D3 F46DC7BB" },
   };
 
-  typedef hmac<sha1> hmac_sha1;
-  typedef hmac_sha1::digest_type digest_type;
-  digest_type digest;
-
   for (int k = 0; k < sizeof(test)/sizeof(test[0]); k++){
     hmac_sha1 ctx(test[k].key, test[k].key_len);
     ctx.update(test[k].data, test[k].data_len);
-    ctx.final(digest);
-    EXPECT_TRUE(IsEqual(test[k].test_data, digest, test[k].digest));
+    EXPECT_TRUE(IsEqual(test[k].test_data, ctx.to_bytes(), test[k].digest));
   }
 }

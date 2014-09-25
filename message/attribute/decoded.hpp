@@ -39,8 +39,10 @@ class decoded {
 
   template<uint16_t T>
   typename detail::traits<T>::decoding_type to() {
-    return detail::traits<T>::decode(message_header_, attribute_start_,
-        attribute_header::decoder(attribute_start_).length());
+    using stun::detail::traits;
+    using stun::detail::attribute_header;
+    attribute_header::decoder adec(attribute_start_);
+    return traits<T>::decode(message_header_, attribute_start_, adec.length());
   }
 
   bool operator==(const decoded &rhs) const {

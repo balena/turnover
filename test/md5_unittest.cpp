@@ -18,23 +18,22 @@ using namespace stun::detail::crypto;
 
 namespace {
 
-std::string digest_to_hex(const uint8_t digest[16]) {
-  int i;
+std::string digest_to_hex(const md5::bytes_type& bytes) {
   std::ostringstream out;
-  for (i = 0; i < 16; i++) {
+  for (size_t i = 0; i < bytes.size(); i++) {
     out << std::setfill('0')
         << std::setw(2)
         << std::hex
-        << (int)digest[i];
+        << (int)bytes[i];
   }
   return out.str();
 }
 
 ::testing::AssertionResult IsEqual(const char *test_data,
-                                   const uint8_t *digest,
+                                   const md5::bytes_type& bytes,
                                    const char *test_result) {
-  std::string output = digest_to_hex(digest);
-  if (strcmp(output.c_str(), test_result) == 0) {
+  std::string output = digest_to_hex(bytes);
+  if (output == test_result) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()
@@ -62,11 +61,9 @@ TEST(Md5Hash, TestVectors) {
     { "abcdefghijklmnopqrstuvwxyz",
       "c3fcd3d76192e4007dfb496cca67e13b" },
   };
-  md5::digest_type digest;
   for (int k = 0; k < sizeof(test)/sizeof(test[0]); k++){
     md5 ctx;
     ctx.update(test[k].input, strlen(test[k].input));
-    ctx.final(digest);
-    EXPECT_TRUE(IsEqual(test[k].input, digest, test[k].digest));
+    EXPECT_TRUE(IsEqual(test[k].input, ctx.to_bytes(), test[k].digest));
   }
 }

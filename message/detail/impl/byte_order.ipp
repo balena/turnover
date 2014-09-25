@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_BYTE_ORDER_HPP
-#define MESSAGE_DETAIL_BYTE_ORDER_HPP
+#ifndef MESSAGE_DETAIL_IMPL_BYTE_ORDER_HPP
+#define MESSAGE_DETAIL_IMPL_BYTE_ORDER_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -76,4 +76,5 @@ uint64_t host_to_network_long_long(uint64_t value) {
 
 #include <message/detail/pop_options.hpp>
 
-#endif // MESSAGE_DETAIL_BYTE_ORDER_HPP
+#endif // MESSAGE_DETAIL_IMPL_BYTE_ORDER_HPP
+

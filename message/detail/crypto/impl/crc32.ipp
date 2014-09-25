@@ -13,6 +13,9 @@
 
 #include <message/detail/config.hpp>
 
+#include <cstring>
+#include <message/detail/byte_order.hpp>
+
 #include <message/detail/push_options.hpp>
 
 namespace stun {
@@ -182,9 +185,12 @@ void crc32::update(const void *data, size_t data_len) {
     crc_ = crc32_tab[(crc_ ^ *p++) & 0xFF] ^ (crc_ >> 8);
 }
 
-void crc32::final(digest_type &digest) {
+crc32::bytes_type crc32::to_bytes() {
+  using namespace std; // For memcpy
   uint32_t crc = crc_ ^ ~0UL;
-  memcpy(&digest, &crc, sizeof(crc));
+  bytes_type result;
+  *(uint32_t*)result.data() = crc;
+  return result;
 }
 
 } // namespace crypto

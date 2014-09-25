@@ -49,8 +49,8 @@ struct basic_endpoint {
       : type_(type), address_(address), port_(port) {}
   uint16_t type() const { return type_; }
   size_t size() const { return Impl::size_of(address_); }
-  void append(const uint8_t*, uint8_t* data) const {
-    typename Impl::encoder encoder(data);
+  void append(const uint8_t* msg_hdr, uint8_t* data) const {
+    typename Impl::encoder encoder(msg_hdr, data);
     encoder.set_address(address_);
     encoder.set_port(port_);
   }
@@ -67,10 +67,10 @@ struct varsize {
   varsize(uint16_t type, const char_type *s, size_t len, uint8_t pad)
       : type_(type), s_(s), len_(len), pad_(pad) {}
   uint16_t type() const { return type_; }
-  size_t size() const { return end_ - begin_; }
+  size_t size() const { return len_; }
   void append(const uint8_t*, uint8_t* data) const {
-    detail::varsize encoder(data);
-    encoder.assign(reinterpret_cast<uint8_t*>(s_), len_, pad_);
+    detail::varsize::encoder encoder(data);
+    encoder.assign(reinterpret_cast<const uint8_t*>(s_), len_, pad_);
   }
   uint16_t type_;
   const char_type *s_;
@@ -78,9 +78,9 @@ struct varsize {
   uint8_t pad_;
 };
 
-template<typename Impl, typename ValueType>
+template<typename Impl>
 struct basic_uint {
-  basic_uint(uint16_t type, ValueType value)
+  basic_uint(uint16_t type, typename Impl::value_type value)
       : type_(type), value_(value) {}
   uint16_t type() const { return type_; }
   size_t size() const { return Impl::size; }
@@ -89,17 +89,17 @@ struct basic_uint {
     encoder.set_value(value_);
   }
   uint16_t type_;
-  ValueType value_;
+  typename Impl::value_type value_;
 };
 
-typedef basic_uint<detail::uint8, uint8_t> uint8;
-typedef basic_uint<detail::uint16, uint16_t> uint16;
-typedef basic_uint<detail::uint32, uint32_t> uint32;
-typedef basic_uint<detail::uint64, uint64_t> uint64;
+typedef basic_uint<detail::uint8> uint8;
+typedef basic_uint<detail::uint16> uint16;
+typedef basic_uint<detail::uint32> uint32;
+typedef basic_uint<detail::uint64> uint64;
 
-template<typename Impl, typename ValueType>
+template<typename Impl>
 struct basic_uint_pad {
-  basic_uint_pad(uint16_t type, ValueType value, uint8_t pad)
+  basic_uint_pad(uint16_t type, typename Impl::value_type value, uint8_t pad)
       : type_(type), value_(value), pad_(pad) {}
   uint16_t type() const { return type_; }
   size_t size() const { return Impl::size; }
@@ -108,12 +108,12 @@ struct basic_uint_pad {
     encoder.set_value(value_);
   }
   uint16_t type_;
-  ValueType value_;
+  typename Impl::value_type value_;
   uint8_t pad_;
 };
 
-typedef basic_uint_pad<detail::uint8_pad, uint8_t> uint8_pad;
-typedef basic_uint_pad<detail::uint16_pad, uint16_t> uint16_pad;
+typedef basic_uint_pad<detail::uint8_pad> uint8_pad;
+typedef basic_uint_pad<detail::uint16_pad> uint16_pad;
 
 struct error_code {
   error_code(int status_code, const char *reason, uint8_t pad)

@@ -38,7 +38,8 @@ struct traits;
 template<> \
 struct traits<attribute::type::d> { \
   typedef empty::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t*, size_t data_len) { \
+  static decoding_type decode(const uint8_t*, const uint8_t*, \
+      size_t data_len) { \
     return decoding_type(data_len); \
   } \
 };
@@ -47,7 +48,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef varsize::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -59,7 +60,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef endpoint::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -69,8 +70,8 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef xor_endpoint::decoder decoding_type; \
-  decoding_type decode(const uint8_t* message_header, const uint8_t* data, \
-      size_t data_len) { \
+  static decoding_type decode(const uint8_t* message_header, \
+      const uint8_t* data, size_t data_len) { \
     return decoding_type(message_header, data, data_len); \
   } \
 };
@@ -79,7 +80,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint8::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -89,7 +90,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint8_pad::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -99,7 +100,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint16::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -109,7 +110,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint16_pad::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -119,7 +120,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint32::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -129,7 +130,7 @@ struct traits<attribute::type::d> { \
 template<> \
 struct traits<attribute::type::d> { \
   typedef uint64::decoder decoding_type; \
-  decoding_type decode(const uint8_t*, const uint8_t* data, \
+  static decoding_type decode(const uint8_t*, const uint8_t* data, \
       size_t data_len) { \
     return decoding_type(data, data_len); \
   } \
@@ -153,7 +154,8 @@ struct traits<attribute::type::d> { \
 template<>
 struct traits<attribute::type::unknown_attributes> {
   typedef unknown_attributes::decoder decoding_type;
-  decoding_type decode(const uint8_t*, const uint8_t* data, size_t data_len) {
+  static decoding_type decode(const uint8_t*, const uint8_t* data,
+      size_t data_len) {
     return decoding_type(data, data_len);
   }
 };
@@ -161,7 +163,7 @@ struct traits<attribute::type::unknown_attributes> {
 template<>
 struct traits<attribute::type::fingerprint> {
   typedef fingerprint::decoder decoding_type;
-  decoding_type decode(const uint8_t* message_header,
+  static decoding_type decode(const uint8_t* message_header,
       const uint8_t* data, size_t data_len) {
     return decoding_type(message_header, data, data_len);
   }
@@ -170,7 +172,7 @@ struct traits<attribute::type::fingerprint> {
 template<>
 struct traits<attribute::type::message_integrity> {
   typedef message_integrity::decoder decoding_type;
-  decoding_type decode(const uint8_t* message_header,
+  static decoding_type decode(const uint8_t* message_header,
       const uint8_t* data, size_t data_len) {
     return decoding_type(message_header, data, data_len);
   }
@@ -179,7 +181,8 @@ struct traits<attribute::type::message_integrity> {
 template<>
 struct traits<attribute::type::error_code> {
   typedef error_code::decoder decoding_type;
-  decoding_type decode(const uint8_t*, const uint8_t* data, size_t data_len) {
+  static decoding_type decode(const uint8_t*, const uint8_t* data,
+      size_t data_len) {
     return decoding_type(data, data_len);
   }
 };

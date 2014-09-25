@@ -130,7 +130,7 @@ void sha1::update(const void *data, size_t len) {
   memcpy(&buffer_[j], &vec[i], len - i);
 }
 
-void sha1::final(digest_type &digest) {
+sha1::bytes_type sha1::to_bytes() {
   size_t i;
   uint8_t finalcount[8];
 
@@ -142,10 +142,13 @@ void sha1::final(digest_type &digest) {
   while ((count_[0] & 504) != 448)
     update("\0", 1);
   update(finalcount, 8); // Should cause a transform()
+
+  bytes_type result;
   for (i = 0; i < 20; i++) {
-    digest[i] =
+    result[i] =
       (uint8_t)((state_[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
   }
+  return result;
 }
 
 } // namespace crypto

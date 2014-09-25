@@ -46,12 +46,12 @@ uint32_t fingerprint::digest(const header_type *header) {
   size_t n = message_header::size
       + network_to_host_short(header->length)
       - (attribute_header::size + uint32::size);
-  crc32::digest_type digest;
+  crc32::bytes_type digest;
   crc32 ctx;
   ctx.update(header, n);
-  ctx.final(digest);
-  *(uint32_t*)digest ^= xor_fingerprint;
-  return network_to_host_long(*(uint32_t*)digest);
+  digest = ctx.to_bytes();
+  *(uint32_t*)digest.data() ^= xor_fingerprint;
+  return *(uint32_t*)digest.data();
 }
 
 } // namespace detail

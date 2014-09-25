@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <message/detail/array.hpp>
 
 #include <message/detail/push_options.hpp>
 
@@ -24,13 +25,16 @@ namespace crypto {
 
 class md5 {
  public:
-  typedef uint8_t digest_type[16];
+#if defined(GENERATING_DOCUMENTATION)
+  typedef array<uint8_t, 16> bytes_type;
+#else
+  typedef stun::detail::array<uint8_t, 16> bytes_type;
+#endif
   static const size_t block_size = 64;
 
   MESSAGE_DECL md5();
-
   MESSAGE_DECL void update(const void *data, size_t size);
-  MESSAGE_DECL void final(digest_type &digest);
+  MESSAGE_DECL bytes_type to_bytes();
 
  private:
   typedef uint32_t MD5_u32plus;

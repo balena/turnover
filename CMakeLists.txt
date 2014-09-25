@@ -68,6 +68,7 @@ add_executable(turnover_tests
   test/sha1_unittest.cpp
   test/md5_unittest.cpp
   test/hmac_unittest.cpp
+  test/message_unittest.cpp
 )
-add_dependencies(turnover_tests gtest gtest_main)
-target_link_libraries(turnover_tests gtest gtest_main)
+add_dependencies(turnover_tests gtest gtest_main boost_static)
+target_link_libraries(turnover_tests gtest gtest_main boost_static)

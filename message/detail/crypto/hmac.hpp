@@ -25,13 +25,12 @@ namespace crypto {
 template<typename Digest>
 class hmac {
  public:
-  typedef typename Digest::digest_type digest_type;
+  typedef typename Digest::bytes_type bytes_type;
   static const size_t block_size = Digest::block_size;
 
   MESSAGE_DECL hmac(const void *key, size_t key_len);
-
   MESSAGE_DECL void update(const void *data, size_t data_len);
-  MESSAGE_DECL void final(digest_type &digest);
+  MESSAGE_DECL bytes_type to_bytes();
 
  private:
   Digest ctx_;
