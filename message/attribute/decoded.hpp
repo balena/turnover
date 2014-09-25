@@ -33,8 +33,10 @@ class decoded {
   }
 
   decoded next() const {
-    return decoded(message_header_, attribute_start_ + attribute_header::size +
-        + attribute_header::decoder(attribute_start_).length());
+    size_t attribute_size =
+        (attribute_header::decoder(attribute_start_).length()+3) & (~3);
+    return decoded(message_header_, attribute_start_
+        + attribute_header::size + attribute_size);
   }
 
   template<uint16_t T>
@@ -42,7 +44,8 @@ class decoded {
     using stun::detail::traits;
     using stun::detail::attribute_header;
     attribute_header::decoder adec(attribute_start_);
-    return traits<T>::decode(message_header_, attribute_start_, adec.length());
+    return traits<T>::decode(message_header_,
+        attribute_start_ + attribute_header::size, adec.length());
   }
 
   bool operator==(const decoded &rhs) const {
