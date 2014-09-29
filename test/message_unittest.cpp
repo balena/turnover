@@ -174,7 +174,7 @@ TEST(StunMsgCxx, RFC5769SampleRequest) {
 
   ASSERT_TRUE(message.end() == ++i);
 }
-#if 0
+
 TEST(StunMsgCxx, RFC5769SampleIPv4Response) {
   const char software_name[] = "test vector";
   const char password[] = "VOkJxbRl1RmTxUk/WvJxBt";
@@ -211,7 +211,8 @@ TEST(StunMsgCxx, RFC5769SampleIPv4Response) {
   using boost::asio::ip::address_v4;
   address_v4 ipv4(address_v4::from_string("192.0.2.1"));
 
-  stun::message message(stun::message::binding_response, tsx_id);
+  stun::message message(stun::message::binding_response,
+      *(stun::message::transaction_type*)tsx_id);
   message << stun::attribute::software(software_name, ' ')
           << stun::attribute::xor_mapped_address(ipv4, 32853)
           << stun::attribute::message_integrity(password)
@@ -290,7 +291,8 @@ TEST(StunMsgEncode, RFC5769SampleIPv6Response) {
   address_v6 ipv6(
       address_v6::from_string("2001:db8:1234:5678:11:2233:4455:6677"));
 
-  stun::message message(stun::message::binding_response, tsx_id);
+  stun::message message(stun::message::binding_response,
+      *(stun::message::transaction_type*)tsx_id);
   message << stun::attribute::software(software_name, ' ')
           << stun::attribute::xor_mapped_address(ipv6, 32853)
           << stun::attribute::message_integrity(password)
@@ -377,7 +379,8 @@ TEST(StunMsgCxx, RFC5769SampleRequestLongTerm) {
   };
 
   std::string key(stun::message::hash_key(username, realm, password));
-  stun::message message(stun::message::binding_request, tsx_id);
+  stun::message message(stun::message::binding_request,
+      *(stun::message::transaction_type*)tsx_id);
   message << stun::attribute::username(username)
           << stun::attribute::nonce(nonce)
           << stun::attribute::realm(realm)
@@ -441,7 +444,8 @@ TEST(StunMsgCxx, ErrorResponse) {
   };
   uint16_t unknown[] = { 0x001a, 0x001b, 0x802c };
 
-  stun::message message(stun::message::binding_error_response, tsx_id);
+  stun::message message(stun::message::binding_error_response,
+      *(stun::message::transaction_type*)tsx_id);
   message << stun::attribute::error_code(420, reason_phrase)
           << stun::attribute::unknown_attributes(unknown, ARRAY_SIZE(unknown));
   ASSERT_EQ(sizeof(expected_result), message.size());
@@ -471,4 +475,3 @@ TEST(StunMsgCxx, ErrorResponse) {
 
   ASSERT_TRUE(message.end() == ++i);
 }
-#endif

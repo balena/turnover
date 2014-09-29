@@ -37,7 +37,7 @@ message_integrity::decoder::decoder(const uint8_t* message_header, const uint8_t
 }
 
 bool message_integrity::decoder::valid() const {
-  return data_len_ == sizeof(impl_type);
+  return data_len_ == size;
 }
 
 bool message_integrity::decoder::check(const uint8_t* key, size_t key_len) const {
@@ -46,7 +46,8 @@ bool message_integrity::decoder::check(const uint8_t* key, size_t key_len) const
   typedef attribute_header::impl_type attribute_type;
   typedef crypto::hmac<crypto::sha1> hmac_sha1;
   const uint8_t *p = reinterpret_cast<const uint8_t*>(message_header_);
-  const uint8_t *p_end = p + network_to_host_short(message_header_->length);
+  const uint8_t *p_end = p + message_header::size
+      + network_to_host_short(message_header_->length);
   uint16_t message_length;
   if ((p_end - size) == reinterpret_cast<const uint8_t*>(data_)) {
     // OK, this is the last attribute, keep length in network byte order
@@ -62,8 +63,8 @@ bool message_integrity::decoder::check(const uint8_t* key, size_t key_len) const
         network_to_host_short(fingerprint->type) == type::fingerprint) {
       // Consider the message length as being the size before adding
       // the fingerprint attribute, but in network byte order
-      message_length = network_to_host_short(message_header_->length) -
-          sizeof(uint32::impl_type);
+      message_length = network_to_host_short(message_header_->length)
+          - (attribute_header::size + uint32::size);
       message_length = host_to_network_short(message_length);
       // End is before MESSAGE-INTEGRITY and FINGERPRINT
       p_end -= attribute_header::size + size
