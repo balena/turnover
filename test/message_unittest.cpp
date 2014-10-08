@@ -65,14 +65,9 @@ TEST(StunMsgCxx, BasicBindingRequest) {
     0x6a,0x8e,0xf1,0xe2  // }
   };
   
-  uint8_t tsx_id[12] = {
-    0xfd,0x95,0xe8,0x83,
-    0x8a,0x05,0x28,0x45,
-    0x6a,0x8e,0xf1,0xe2
-  };
+  stun::message::transaction_type tsx_id(0xfd95e883, 0x8a0528456a8ef1e2);
 
-  stun::message message(stun::message::binding_request,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_request, tsx_id);
   ASSERT_EQ(sizeof(expected_result), message.size());
   EXPECT_TRUE(IsEqual(expected_result, message.data(),
       sizeof(expected_result)));
@@ -119,14 +114,9 @@ TEST(StunMsgCxx, RFC5769SampleRequest) {
     0xe5,0x7a,0x3b,0xcf, //    CRC0x32, fingerprint
   };
 
-  uint8_t tsx_id[12] = {
-    0xb7,0xe7,0xa7,0x01,
-    0xbc,0x34,0xd6,0x86,
-    0xfa,0x87,0xdf,0xae
-  };
+  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
-  stun::message message(stun::message::binding_request,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_request, tsx_id);
   message << stun::attribute::software(software_name, ' ')
           << stun::attribute::priority(0x6e0001fful)
           << stun::attribute::ice_controlled(0x932ff9b151263b36ull)
@@ -202,17 +192,12 @@ TEST(StunMsgCxx, RFC5769SampleIPv4Response) {
     0xc0,0x7d,0x4c,0x96, //    CRC32 fingerprint
   };
 
-  uint8_t tsx_id[12] = {
-    0xb7,0xe7,0xa7,0x01,
-    0xbc,0x34,0xd6,0x86,
-    0xfa,0x87,0xdf,0xae
-  };
+  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
   using boost::asio::ip::address_v4;
   address_v4 ipv4(address_v4::from_string("192.0.2.1"));
 
-  stun::message message(stun::message::binding_response,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_response, tsx_id);
   message << stun::attribute::software(software_name, ' ')
           << stun::attribute::xor_mapped_address(ipv4, 32853)
           << stun::attribute::message_integrity(password)
@@ -281,18 +266,13 @@ TEST(StunMsgEncode, RFC5769SampleIPv6Response) {
     0xc8,0xfb,0x0b,0x4c, //    CRC32 fingerprint
   };
 
-  uint8_t tsx_id[12] = {
-    0xb7,0xe7,0xa7,0x01,
-    0xbc,0x34,0xd6,0x86,
-    0xfa,0x87,0xdf,0xae
-  };
+  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
   using boost::asio::ip::address_v6;
   address_v6 ipv6(
       address_v6::from_string("2001:db8:1234:5678:11:2233:4455:6677"));
 
-  stun::message message(stun::message::binding_response,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_response, tsx_id);
   message << stun::attribute::software(software_name, ' ')
           << stun::attribute::xor_mapped_address(ipv6, 32853)
           << stun::attribute::message_integrity(password)
@@ -372,15 +352,10 @@ TEST(StunMsgCxx, RFC5769SampleRequestLongTerm) {
     0x8c,0xa8,0x96,0x66, // }
   };
 
-  uint8_t tsx_id[12] = {
-    0x78,0xad,0x34,0x33,
-    0xc6,0xad,0x72,0xc0,
-    0x29,0xda,0x41,0x2e,
-  };
+  stun::message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
 
   std::string key(stun::message::hash_key(username, realm, password));
-  stun::message message(stun::message::binding_request,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_request, tsx_id);
   message << stun::attribute::username(username)
           << stun::attribute::nonce(nonce)
           << stun::attribute::realm(realm)
@@ -437,15 +412,10 @@ TEST(StunMsgCxx, ErrorResponse) {
     0x80,0x2C,0x00,0x00, //    0x802C
   };
 
-  uint8_t tsx_id[12] = {
-    0x78,0xad,0x34,0x33,
-    0xc6,0xad,0x72,0xc0,
-    0x29,0xda,0x41,0x2e,
-  };
+  stun::message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
   uint16_t unknown[] = { 0x001a, 0x001b, 0x802c };
 
-  stun::message message(stun::message::binding_error_response,
-      *(stun::message::transaction_type*)tsx_id);
+  stun::message message(stun::message::binding_error_response, tsx_id);
   message << stun::attribute::error_code(420, reason_phrase)
           << stun::attribute::unknown_attributes(unknown, ARRAY_SIZE(unknown));
   ASSERT_EQ(sizeof(expected_result), message.size());

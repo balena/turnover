@@ -18,6 +18,8 @@
 #include <message/attribute/decoding.hpp>
 #include <message/attribute/decoded.hpp>
 #include <message/detail/crypto/md5.hpp>
+#include <message/detail/uint96_t.hpp>
+#include <message/detail/byte_order.hpp>
 
 #include <message/detail/push_options.hpp>
 
@@ -105,7 +107,7 @@ class basic_message {
   static const size_t attribute_header_size = detail::attribute_header::size;
   static const uint32_t magic_value = 0x2112A442ul;
 
-  typedef detail::message_header::tsx_id_type transaction_type;
+  typedef detail::uint96_t transaction_type;
 
   basic_message()
       : buffer_(header_size, 0) {}
@@ -129,7 +131,11 @@ class basic_message {
     message_header::encoder henc(buffer_.data());
     henc.set_type(type);
     henc.set_magic(magic_value);
-    henc.set_tsx_id(tsx_id);
+    
+    message_header::tsx_id_type p;
+    p.u96.high = detail::host_to_network_long(tsx_id.high());
+    p.u96.low = detail::host_to_network_long_long(tsx_id.low());
+    henc.set_tsx_id(p);
   }
 
   ~basic_message() {}

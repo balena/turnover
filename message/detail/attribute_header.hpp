@@ -4,8 +4,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef MESSAGE_DETAIL_BASIC_ATTRIBUTE_HPP
-#define MESSAGE_DETAIL_BASIC_ATTRIBUTE_HPP
+#ifndef MESSAGE_DETAIL_ATTRIBUTE_HEADER_HPP
+#define MESSAGE_DETAIL_ATTRIBUTE_HEADER_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -57,5 +57,5 @@ struct attribute_header {
 #include <message/detail/impl/attribute_header.ipp>
 #endif // defined(MESSAGE_HEADER_ONLY)
 
-#endif // MESSAGE_DETAIL_BASIC_ATTRIBUTE_HPP
+#endif // MESSAGE_DETAIL_ATTRIBUTE_HEADER_HPP
 

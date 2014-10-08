@@ -26,6 +26,10 @@ struct message_header {
     uint8_t u8[12];
     uint16_t u16[6];
     uint32_t u32[3];
+    struct {
+      uint32_t high;
+      uint64_t low;
+    } u96;
   };
   struct impl_type {
     uint16_t type;       // message type
