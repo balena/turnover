@@ -129,21 +129,21 @@ class uint96_t {
     return result -= rhs;
   }
 
-  uint96_t operator++ () {
+  uint96_t operator++() {
     *this += uint96_t(1);
     return *this;
   }
-  uint96_t operator++ (int) {
+  uint96_t operator++(int) {
     uint96_t temp(*this);
     ++*this;
     return temp;
   }
 
-  uint96_t operator-- () {
+  uint96_t operator--() {
     *this -= uint96_t(1);
     return *this;
   }
-  uint96_t operator-- (int) {
+  uint96_t operator--(int) {
     uint96_t temp(*this);
     --*this;
     return temp;

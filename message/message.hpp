@@ -28,48 +28,6 @@ namespace stun {
 template<class Allocator>
 class basic_message {
  public:
-  class iterator {
-   public:
-    typedef iterator self_type;
-    typedef size_t difference_type;
-    typedef size_t size_type;
-    typedef attribute::decoded value_type;
-    typedef attribute::decoded* pointer;
-    typedef attribute::decoded& reference;
-    typedef std::forward_iterator_tag iterator_category;
-
-    iterator(const uint8_t *msg_hdr, const uint8_t *ptr)
-        : attr_(msg_hdr, ptr) {}
-
-    self_type operator++() {
-      attr_ = attr_.next();
-      return *this;
-    }
-
-    self_type operator++(int) {
-      self_type it = *this;
-      attr_ = attr_.next();
-      return it;
-    }
-
-    const reference operator*() {
-      return attr_;
-    }
-    const pointer operator->() {
-      return &attr_;
-    }
-
-    bool operator==(const self_type& rhs) {
-      return attr_ == rhs.attr_;
-    }
-    bool operator!=(const self_type& rhs) {
-      return attr_ != rhs.attr_;
-    }
-
-   private:
-    attribute::decoded attr_;
-  };
-
   enum type {
     binding_request                   = 0x0001, // RFC 5389
     binding_response                  = 0x0101, // RFC 5389
@@ -109,59 +67,27 @@ class basic_message {
 
   typedef detail::uint96_t transaction_type;
 
-  basic_message()
-      : buffer_(header_size, 0) {}
+  basic_message(uint16_t type, const transaction_type& tsx_id)
+      : buffer_(header_size, 0) {
+    init(type, magic_value, tsx_id);
+  }
 
-  basic_message(size_t n)
-      : buffer_(n < header_size ? header_size : n, 0) {}
+  basic_message(uint16_t type, uint32_t magic, const transaction_type& tsx_id)
+      : buffer_(header_size, 0) {
+    init(type, magic, tsx_id);
+  }
 
   basic_message(const basic_message& msg)
       : buffer_(msg.buffer_) {}
 
-  basic_message(const uint8_t *buf, size_t buf_len)
-      : buffer_(buf, buf_len) {}
-
-  template<class InputIterator>
-  basic_message(InputIterator first, InputIterator last)
-      : buffer_(first, last) {}
-
-  basic_message(uint16_t type, const transaction_type& tsx_id)
-      : buffer_(header_size, 0) {
-    using detail::message_header;
-    message_header::encoder henc(buffer_.data());
-    henc.set_type(type);
-    henc.set_magic(magic_value);
-    
-    message_header::tsx_id_type p;
-    p.u96.high = detail::host_to_network_long(tsx_id.high());
-    p.u96.low = detail::host_to_network_long_long(tsx_id.low());
-    henc.set_tsx_id(p);
-  }
-
   ~basic_message() {}
 
-  void resize(size_t size) { buffer_.resize(size, 0); }
-  size_t capacity() const { return buffer_.size(); }
-
-  uint8_t *data() { return buffer_.data(); }
   const uint8_t *data() const { return buffer_.data(); }
 
   size_t size() const {
     using detail::message_header;
     message_header::decoder hdec(buffer_.data());
     return message_header::size + hdec.length();
-  }
-
-  bool verify() const {
-    // TODO
-    return false;
-    //return stun_msg_verify(hdr(), capacity()) == 0 ? false : true;
-  }
-
-  uint16_t type() const {
-    using detail::message_header;
-    message_header::decoder hdec(buffer_.data());
-    return hdec.type();
   }
 
   template<typename AttributeType>
@@ -178,17 +104,6 @@ class basic_message {
     aenc.set_length(attr.size());
     aenc.set_type(attr.type());
     attr.append(buffer_.data(), end + attribute_header_size);
-  }
-
-  iterator begin() const {
-    return iterator(buffer_.data(),
-        buffer_.data() + detail::message_header::size);
-  }
-
-  iterator end() const {
-    return iterator(buffer_.data(),
-        buffer_.data() + detail::message_header::size
-        + detail::message_header::decoder(buffer_.data()).length());
   }
 
   static std::string hash_key(const std::string& username,
@@ -211,6 +126,18 @@ class basic_message {
 
  private:
   std::vector<uint8_t, Allocator> buffer_;
+
+  void init(uint16_t type, uint32_t magic, const transaction_type& tsx_id) {
+    using detail::message_header;
+    message_header::encoder henc(buffer_.data());
+    henc.set_type(type);
+    henc.set_magic(magic);
+    
+    message_header::tsx_id_type p;
+    p.u96.high = detail::host_to_network_long(tsx_id.high());
+    p.u96.low = detail::host_to_network_long_long(tsx_id.low());
+    henc.set_tsx_id(p);
+  }
 };
 
 template<class Allocator>
@@ -278,16 +205,51 @@ inline basic_message<Allocator> &operator << (basic_message<Allocator> &msg,
 
 typedef basic_message<std::allocator<uint8_t> > message;
 
-#if 0
 class message_piece {
  public:
-  typedef message::iterator iterator;
+  class iterator {
+   public:
+    typedef iterator self_type;
+    typedef size_t difference_type;
+    typedef size_t size_type;
+    typedef attribute::decoded value_type;
+    typedef attribute::decoded* pointer;
+    typedef attribute::decoded& reference;
+    typedef std::forward_iterator_tag iterator_category;
 
-  message_piece()
-      : ptr_(NULL), length_(0) {}
+    iterator(const uint8_t *msg_hdr, const uint8_t *ptr)
+        : attr_(msg_hdr, ptr) {}
 
-  message_piece(const message& msg)
-      : ptr_(msg.data()), length_(msg.size()) {}
+    self_type operator++() {
+      attr_ = attr_.next();
+      return *this;
+    }
+
+    self_type operator++(int) {
+      self_type it = *this;
+      attr_ = attr_.next();
+      return it;
+    }
+
+    const reference operator*() {
+      return attr_;
+    }
+    const pointer operator->() {
+      return &attr_;
+    }
+
+    bool operator==(const self_type& rhs) {
+      return attr_ == rhs.attr_;
+    }
+    bool operator!=(const self_type& rhs) {
+      return attr_ != rhs.attr_;
+    }
+
+   private:
+    attribute::decoded attr_;
+  };
+
+  typedef message::transaction_type transaction_type;
 
   message_piece(const uint8_t *buf, size_t buf_len)
       : ptr_(buf), length_(buf_len) {}
@@ -297,37 +259,57 @@ class message_piece {
       : ptr_((last > first) ? &(*first) : NULL),
         length_((last > first) ? (size_t)(last - first) : 0) {}
 
+  message_piece(const message& msg)
+      : ptr_(msg.data()), length_(msg.size()) {}
+
   ~message_piece() {}
+
+  uint16_t type() const {
+    using detail::message_header;
+    message_header::decoder hdec(ptr_);
+    return hdec.type();
+  }
+
+  uint32_t magic() const {
+    using detail::message_header;
+    message_header::decoder hdec(ptr_);
+    return hdec.magic();
+  }
+
+  transaction_type tsx_id() const {
+    using detail::message_header;
+    message_header::decoder hdec(ptr_);
+    hdec.magic();
+
+    message_header::tsx_id_type tsx_id = hdec.tsx_id();
+    return transaction_type(detail::network_to_host_long(tsx_id.u96.high),
+                            detail::network_to_host_long_long(tsx_id.u96.low));
+  }
+
+  bool verify() const {
+    // TODO
+    return false;
+    //return stun_msg_verify(hdr(), capacity()) == 0 ? false : true;
+  }
 
   const uint8_t *data() const { return ptr_; }
   size_t size() const { return length_; }
 
-  bool verify() const {
-    return stun_msg_verify(hdr(), length_) == 0 ? false : true;
-  }
-
-  uint16_t type() const {
-    return stun_msg_type(hdr());
-  }
-
   iterator begin() const {
-    return iterator(hdr(),
-      reinterpret_cast<const uint8_t*>(stun_msg_next_attr(hdr(), NULL)));
+    return iterator(ptr_,
+        ptr_ + detail::message_header::size);
   }
 
   iterator end() const {
-    return iterator(hdr(), NULL);
+    return iterator(ptr_,
+        ptr_ + detail::message_header::size
+        + detail::message_header::decoder(ptr_).length());
   }
 
  private:
   const uint8_t *ptr_;
   size_t length_;
-
-  const stun_msg_hdr *hdr() const {
-    return reinterpret_cast<const stun_msg_hdr*>(ptr_);
-  }
 };
-#endif
 
 } // namespace stun
 

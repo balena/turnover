@@ -11,6 +11,8 @@
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+using namespace stun;
+
 namespace {
 
 void PrintWord(const uint8_t *v, size_t size, std::ostream &out) {
@@ -65,18 +67,21 @@ TEST(StunMsgCxx, BasicBindingRequest) {
     0x6a,0x8e,0xf1,0xe2  // }
   };
   
-  stun::message::transaction_type tsx_id(0xfd95e883, 0x8a0528456a8ef1e2);
+  message::transaction_type tsx_id(0xfd95e883, 0x8a0528456a8ef1e2);
 
-  stun::message message(stun::message::binding_request, tsx_id);
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  message msg(message::binding_request, tsx_id);
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  EXPECT_EQ(stun::message::binding_request, message.type());
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_request, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() == i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() == i);
 }
 
 TEST(StunMsgCxx, RFC5769SampleRequest) {
@@ -114,55 +119,58 @@ TEST(StunMsgCxx, RFC5769SampleRequest) {
     0xe5,0x7a,0x3b,0xcf, //    CRC0x32, fingerprint
   };
 
-  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
+  message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
-  stun::message message(stun::message::binding_request, tsx_id);
-  message << stun::attribute::software(software_name, ' ')
-          << stun::attribute::priority(0x6e0001fful)
-          << stun::attribute::ice_controlled(0x932ff9b151263b36ull)
-          << stun::attribute::username(username, ' ')
-          << stun::attribute::message_integrity(password)
-          << stun::attribute::fingerprint();
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  message msg(message::binding_request, tsx_id);
+  msg << attribute::software(software_name, ' ')
+      << attribute::priority(0x6e0001fful)
+      << attribute::ice_controlled(0x932ff9b151263b36ull)
+      << attribute::username(username, ' ')
+      << attribute::message_integrity(password)
+      << attribute::fingerprint();
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  using namespace stun::attribute;
-  EXPECT_EQ(stun::message::binding_request, message.type());
+  using namespace attribute;
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_request, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() != i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() != i);
   EXPECT_EQ(type::software, i->type());
   ASSERT_EQ(software_name,
     i->to<type::software>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::priority, i->type());
   EXPECT_EQ(0x6e0001fful,
     i->to<type::priority>().value());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::ice_controlled, i->type());
   EXPECT_EQ(0x932ff9b151263b36ull,
     i->to<type::ice_controlled>().value());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::username, i->type());
   EXPECT_EQ(username,
     i->to<type::username>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::message_integrity, i->type());
   EXPECT_TRUE(
     i->to<type::message_integrity>().check(password));
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::fingerprint, i->type());
   EXPECT_TRUE(
     i->to<type::fingerprint>().check());
 
-  ASSERT_TRUE(message.end() == ++i);
+  ASSERT_TRUE(incoming.end() == ++i);
 }
 
 TEST(StunMsgCxx, RFC5769SampleIPv4Response) {
@@ -192,48 +200,51 @@ TEST(StunMsgCxx, RFC5769SampleIPv4Response) {
     0xc0,0x7d,0x4c,0x96, //    CRC32 fingerprint
   };
 
-  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
+  message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
   using boost::asio::ip::address_v4;
   address_v4 ipv4(address_v4::from_string("192.0.2.1"));
 
-  stun::message message(stun::message::binding_response, tsx_id);
-  message << stun::attribute::software(software_name, ' ')
-          << stun::attribute::xor_mapped_address(ipv4, 32853)
-          << stun::attribute::message_integrity(password)
-          << stun::attribute::fingerprint();
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  message msg(message::binding_response, tsx_id);
+  msg << attribute::software(software_name, ' ')
+      << attribute::xor_mapped_address(ipv4, 32853)
+      << attribute::message_integrity(password)
+      << attribute::fingerprint();
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  using namespace stun::attribute;
-  EXPECT_EQ(stun::message::binding_response, message.type());
+  using namespace attribute;
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_response, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() != i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() != i);
   EXPECT_EQ(type::software, i->type());
   ASSERT_EQ(software_name,
     i->to<type::software>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::xor_mapped_address, i->type());
   sockaddr_in test_addr;
   memset(&test_addr, 0, sizeof(test_addr));
   EXPECT_EQ(32853, i->to<type::xor_mapped_address>().port());
   EXPECT_EQ(ipv4, i->to<type::xor_mapped_address>().address());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::message_integrity, i->type());
   EXPECT_TRUE(
     i->to<type::message_integrity>().check(password));
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::fingerprint, i->type());
   EXPECT_TRUE(
     i->to<type::fingerprint>().check());
 
-  ASSERT_TRUE(message.end() == ++i);
+  ASSERT_TRUE(incoming.end() == ++i);
 }
 
 TEST(StunMsgEncode, RFC5769SampleIPv6Response) {
@@ -266,47 +277,50 @@ TEST(StunMsgEncode, RFC5769SampleIPv6Response) {
     0xc8,0xfb,0x0b,0x4c, //    CRC32 fingerprint
   };
 
-  stun::message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
+  message::transaction_type tsx_id(0xb7e7a701, 0xbc34d686fa87dfae);
 
   using boost::asio::ip::address_v6;
   address_v6 ipv6(
       address_v6::from_string("2001:db8:1234:5678:11:2233:4455:6677"));
 
-  stun::message message(stun::message::binding_response, tsx_id);
-  message << stun::attribute::software(software_name, ' ')
-          << stun::attribute::xor_mapped_address(ipv6, 32853)
-          << stun::attribute::message_integrity(password)
-          << stun::attribute::fingerprint();
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  message msg(message::binding_response, tsx_id);
+  msg << attribute::software(software_name, ' ')
+      << attribute::xor_mapped_address(ipv6, 32853)
+      << attribute::message_integrity(password)
+      << attribute::fingerprint();
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  using namespace stun::attribute;
-  EXPECT_EQ(stun::message::binding_response, message.type());
+  using namespace attribute;
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_response, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() != i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() != i);
   EXPECT_EQ(type::software, i->type());
   ASSERT_EQ(software_name,
     i->to<type::software>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::xor_mapped_address, i->type());
   EXPECT_EQ(32853, i->to<type::xor_mapped_address>().port());
   EXPECT_EQ(ipv6, i->to<type::xor_mapped_address>().address());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::message_integrity, i->type());
   EXPECT_TRUE(
     i->to<type::message_integrity>().check(password));
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::fingerprint, i->type());
   EXPECT_TRUE(
     i->to<type::fingerprint>().check());
 
-  ASSERT_TRUE(message.end() == ++i);
+  ASSERT_TRUE(incoming.end() == ++i);
 }
 
 TEST(StunMsgCxx, RFC5769SampleRequestLongTerm) {
@@ -352,44 +366,47 @@ TEST(StunMsgCxx, RFC5769SampleRequestLongTerm) {
     0x8c,0xa8,0x96,0x66, // }
   };
 
-  stun::message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
+  message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
 
-  std::string key(stun::message::hash_key(username, realm, password));
-  stun::message message(stun::message::binding_request, tsx_id);
-  message << stun::attribute::username(username)
-          << stun::attribute::nonce(nonce)
-          << stun::attribute::realm(realm)
-          << stun::attribute::message_integrity(key);
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  std::string key(message::hash_key(username, realm, password));
+  message msg(message::binding_request, tsx_id);
+  msg << attribute::username(username)
+      << attribute::nonce(nonce)
+      << attribute::realm(realm)
+      << attribute::message_integrity(key);
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  using namespace stun::attribute;
-  EXPECT_EQ(stun::message::binding_request, message.type());
+  using namespace attribute;
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_request, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() != i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() != i);
   EXPECT_EQ(type::username, i->type());
   ASSERT_EQ(username,
     i->to<type::username>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::nonce, i->type());
   ASSERT_EQ(nonce,
     i->to<type::nonce>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::realm, i->type());
   ASSERT_EQ(realm,
     i->to<type::realm>().to_string());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::message_integrity, i->type());
   EXPECT_TRUE(
     i->to<type::message_integrity>().check(key));
 
-  ASSERT_TRUE(message.end() == ++i);
+  ASSERT_TRUE(incoming.end() == ++i);
 }
 
 TEST(StunMsgCxx, ErrorResponse) {
@@ -412,36 +429,39 @@ TEST(StunMsgCxx, ErrorResponse) {
     0x80,0x2C,0x00,0x00, //    0x802C
   };
 
-  stun::message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
+  message::transaction_type tsx_id(0x78ad3433, 0xc6ad72c029da412e);
   uint16_t unknown[] = { 0x001a, 0x001b, 0x802c };
 
-  stun::message message(stun::message::binding_error_response, tsx_id);
-  message << stun::attribute::error_code(420, reason_phrase)
-          << stun::attribute::unknown_attributes(unknown, ARRAY_SIZE(unknown));
-  ASSERT_EQ(sizeof(expected_result), message.size());
-  EXPECT_TRUE(IsEqual(expected_result, message.data(),
+  message msg(message::binding_error_response, tsx_id);
+  msg << attribute::error_code(420, reason_phrase)
+      << attribute::unknown_attributes(unknown, ARRAY_SIZE(unknown));
+  ASSERT_EQ(sizeof(expected_result), msg.size());
+  EXPECT_TRUE(IsEqual(expected_result, msg.data(),
       sizeof(expected_result)));
 
   // Now decoding
-  using namespace stun::attribute;
-  EXPECT_EQ(stun::message::binding_error_response, message.type());
+  using namespace attribute;
+  message_piece incoming(expected_result, sizeof(expected_result));
+  EXPECT_EQ(message::binding_error_response, incoming.type());
+  EXPECT_EQ(message::magic_value, incoming.magic());
+  EXPECT_EQ(tsx_id, incoming.tsx_id());
 
-  stun::message::iterator i = message.begin();
-  ASSERT_TRUE(message.end() != i);
+  message_piece::iterator i = incoming.begin();
+  ASSERT_TRUE(incoming.end() != i);
   EXPECT_EQ(type::error_code, i->type());
-  stun::attribute::decoding::error_code errcode =
+  decoding::error_code errcode =
     i->to<type::error_code>();
   EXPECT_EQ(420, errcode.status_code());
   EXPECT_EQ(reason_phrase, errcode.reason_phrase());
 
-  ASSERT_TRUE(message.end() != ++i);
+  ASSERT_TRUE(incoming.end() != ++i);
   EXPECT_EQ(type::unknown_attributes, i->type());
-  stun::attribute::decoding::unknown_attributes unk =
+  decoding::unknown_attributes unk =
     i->to<type::unknown_attributes>();
   ASSERT_EQ(ARRAY_SIZE(unknown), unk.size());
   for (size_t i = 0; i < ARRAY_SIZE(unknown); i++) {
     EXPECT_EQ(unknown[i], unk[i]);
   }
 
-  ASSERT_TRUE(message.end() == ++i);
+  ASSERT_TRUE(incoming.end() == ++i);
 }
